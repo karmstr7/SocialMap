@@ -55,11 +55,17 @@ public class MainActivity extends AppCompatActivity{
                 //                MainActivity.this.getResources(), R.drawable.custom_marker);
                 //        mapboxMap.addImage(MARKER_IMAGE, icon);
                 ////        addMarkers();
+
                 mapboxMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(-123.07640946242944, 44.04665947871217))
+//                        These coords aren't accurate
+                        .position(new LatLng(44.44, -123.07))
                         .title("University of Oregon")
                         .snippet("Eugene, Oregon"));
 
+                mapboxMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(35.20859, -106.449893))
+                        .title("Big Hike")
+                        .snippet("Sandia Crest"));
             }
         });
     }
