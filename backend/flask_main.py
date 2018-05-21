@@ -1,10 +1,8 @@
-
-
-import logging
+from flask import jsonify, abort, make_response, request
 import flask  # Web server tool.
 from mongo_msg import *  # Mongo code
 import config  # Get config settings from credentials file
-import datetime  # This is for backup function
+import logging
 
 ####
 # App globals:
@@ -14,9 +12,46 @@ CONFIG = config.configuration()
 app = flask.Flask(__name__)
 app.secret_key = CONFIG.SECRET_KEY
 
+
+###
+# REST API SERVICE
+###
+
+
+@app.route('/socialmap/api/login', methods=['POST'])
+def login():
+    print("ATTEMPT TO LOG IN USER")
+    print(request.json)
+    username = request.json['username']
+    password = request.json['password']
+    # Verify user here
+    # Get the friends list
+    friends = []
+    # Get the messages
+    messages = []
+
+    # On success, return the user's ID
+    return jsonify({'id': 'something unique'}), 201
+
+
+@app.route('/socialmap/api/signup', methods=['POST'])
+def signup():
+    print("ATTEMPT TO CREATE USER")
+    print(request.json)
+    username = request.json['username']
+    password = request.json['password']
+    # Check for pre-existing account of the same name
+    # Create ID for user, empty friends list, and empty message list
+    # Will include date_of_creation later on
+
+    # On success, return the user's ID
+    return jsonify({'id': 'something unique', 'friends': [], 'messages': []}), 201
+
+
 ###
 # URL AJAX Routing
 ###
+
 
 @app.route("/_addmsg")
 def addMsg():
@@ -197,25 +232,21 @@ def clear():
                   }
         return flask.jsonify(result=result)  # return result to front end
 
-###
-# Pages
-###
-
-# Main index page
-@app.route("/")
-@app.route("/index")
-def index():
-    app.logger.debug("Main page entry")
-    # return flask.render_template('index.html')
-
 
 # Error page(s)
 @app.errorhandler(404)
-def page_not_found(error):
-    app.logger.debug("Page not found")
-    return flask.render_template('page_not_found.html',
-                                 badurl=flask.request.base_url,
-                                 linkback=flask.url_for("index")), 404
+def not_found(error):
+    return make_response(jsonify({'error': 'Not Found'}), 404)
+
+
+@app.errorhandler(400)
+def format_error(error):
+    return make_response(jsonify({'error': 'Invalid format'}),400)
+
+
+@app.errorhandler(500)
+def server_error(error):
+    return make_response(jsonify({'error': 'Server error'}), 500)
 
 
 if __name__ == "__main__":
