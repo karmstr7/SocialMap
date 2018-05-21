@@ -9,10 +9,17 @@
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        mapbox:mapbox_cameraTargetLat="44.73581"
-        mapbox:mapbox_cameraTargetLng="-123.07"
+        mapbox:mapbox_cameraTargetLat="44.04665947871217"
+        mapbox:mapbox_cameraTargetLng="-123.07640946242944"
         mapbox:mapbox_styleUrl="mapbox://styles/mapbox/outdoors-v10"
-        mapbox:mapbox_cameraZoom="13" />
+        mapbox:mapbox_cameraZoom="13" >
+
+        <!--<Button-->
+            <!--android:id="@+id/button"-->
+            <!--android:layout_width="182dp"-->
+            <!--android:layout_height="99dp"-->
+            <!--android:text="Button" />-->
+    </com.mapbox.mapboxsdk.maps.MapView>
 
 
 </RelativeLayout>
