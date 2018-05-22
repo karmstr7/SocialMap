@@ -12,7 +12,7 @@ INVENV = . env/bin/activate ;
 PYVENV = python3 -m venv
 
 run:	env 	credentials
-	$(INVENV) cd source; python3 flask_main.py
+	$(INVENV) python3 flask_main.py
 
 install: env 	credentials
 
@@ -29,7 +29,7 @@ credentials.ini:
 	echo "You just install the database and credentials.ini for it"
 
 test:	env
-	$(INVENV) cd meetings; nosetests
+	$(INVENV) cd tests; nosetests
 
 ##
 ## Preserve virtual environment for git repository

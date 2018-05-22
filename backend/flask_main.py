@@ -20,217 +20,154 @@ app.secret_key = CONFIG.SECRET_KEY
 
 @app.route('/socialmap/api/login', methods=['POST'])
 def login():
-    print("ATTEMPT TO LOG IN USER")
-    print(request.json)
+    app.logger.debug("ATTEMPT TO LOG IN USER")
+    app.logger.debug(request.json)
+
     username = request.json['username']
     password = request.json['password']
+
+    act = {
+        "username": username,
+        "password": password,
+    }
+
     # Verify user here
-    # Get the friends list
-    friends = []
-    # Get the messages
-    messages = []
+    result = mongo_login(act)
+    # Get messages of user
+    if len(result) != 0:
+        result["messages"] = mongo_getMsgs(result["username"])
 
     # On success, return the user's ID
-    return jsonify({'id': 'something unique'}), 201
+    if result != 412:
+        app.logger.debug("USER LOGGED IN")
+        return jsonify(result), 201
+    else:
+        app.logger.debug("LOGIN FAILED")
+        return jsonify(result)
 
 
 @app.route('/socialmap/api/signup', methods=['POST'])
 def signup():
-    print("ATTEMPT TO CREATE USER")
-    print(request.json)
+    app.logger.debug("ATTEMPT TO CREATE USER")
+    app.logger.debug(request.json)
+
     username = request.json['username']
     password = request.json['password']
-    # Check for pre-existing account of the same name
-    # Create ID for user, empty friends list, and empty message list
-    # Will include date_of_creation later on
+    # date = request.json['date_created']
 
+    act = {
+        "username": username,
+        "password": password,
+        "date_created": ""
+    }
+
+    result = mongo_signup(act)
     # On success, return the user's ID
-    return jsonify({'id': 'something unique', 'friends': [], 'messages': []}), 201
+    if result != 412:
+        result["messages"] = []
+        app.logger.debug("USER CREATED")
+        return jsonify(result), 201
+
+    else:
+        app.logger.debug("USER FAILED TO CREATE")
+        return jsonify(result)
 
 
-###
-# URL AJAX Routing
-###
-
-
-@app.route("/_addmsg")
+@app.route('/socialmap/api/addMsg', methods=['POST'])
 def addMsg():
+    app.logger.debug("ATTEMPT TO ADD MSG")
+    app.logger.debug(request.json)
 
-    app.logger.debug("_addmsg")
-    # Get msg information
+    username = request.json['username']
+    msg_data = request.json['msg_data']
+    msg_body = request.json['msg_body']
+    # date = request.json['date_created']
 
     msg = {
-        "placeholder": flask.request.args.get("placeholder", type=str),  # Type: string
+        "username": username,
+        "msg_data": msg_data,
+        "msg_body": msg_body
     }
 
-    ret = mongo_addMsg(msg)  # Call to helper function, passes msg above
-
-    if ret != 412 or ret != 416:  # check for error codes
-        app.logger.debug("Inserted")
-        result = {"message": "msg Inserted!",  # message for success
-                  "status": 201,  # status code for success
-                  "token": ret  # token of added msg
-                  }
-        return flask.jsonify(result=result)
-    else:  # return error codes with message
-        app.logger.debug(ret)
-        result = {"error": "Failed to Add msg",  # error message
-                  "status": ret  # status code returned from helper
-                  }
-        return flask.jsonify(result=result)
-
-
-@app.route("/_editMsg")
-def editmsg():
-
-    app.logger.debug("_editMsg")
-    msg = {
-        "placeholder": flask.request.args.get("placeholder", type=str),  # Type: string
-        "token": flask.request.args.get("token", type=str)  # unique token for msg, length 20
-    }
-
-    ret = mongo_editMsg(msg)  # Call to helper function, passes msg above
-
-    if ret is True:  # check to see if it was successful
-        app.logger.debug("msg edited")
-        result = {"message": "msg Edited!",  # message for success
-                  "status": 202,  # status code
-                  "token": ret  # token of edited msg
-                  }
-        return flask.jsonify(result=result)  # return result to front end
-
-    else:  # if it wasn't successful
-        app.logger.debug("Failed to edit msg")
-        result = {"error": "Failed to edit msg",  # error message
-                  "status": ret  # status code returned from helper
-                  }
-        return flask.jsonify(result=result)  # return result to front end
-
-
-@app.route("/_delMsg")
-def delmsg():
-
-    app.logger.debug("_delMsg")
-    # Get token
-    token = flask.request.args.get("token", type=str)  # database token of length 20
-
-    ret = mongo_delMsg(token)  # Call to helper function, passes token from above
-
-    if ret is True:  # if successful
-        app.logger.debug("Deleted")
-        result = {"message": "msg Deleted!",  # message for success
-                  "status": 203  # status code for success
-                  }
-        return flask.jsonify(result=result)
-
-    else:  # if unsuccessful
-        app.logger.debug(ret)
-        result = {"error": "Failed to Delete msg",  # error message
-                  "status": 414  # status code
-                  }
-        return flask.jsonify(result=result)
-
-
-@app.route("/_getUser")
-def getUser():
-
-    app.logger.debug("_getmsg")
-    # Get token
-    token = flask.request.args.get("token", type=str)  # database token of length 20
-
-    ret = mongo_getUser(token)  # Call to helper function, passes token from above
-
-    if ret != 415:  # if successful
-        app.logger.debug("Retrieved User")
-        result = {
-            "message": "User Retrieved!",  # message for success
-            "msg": ret,  # msg returned from helper
-            "status": 204  # status code for success
-        }
-        return flask.jsonify(result=result)  # return result to front end
-
-    else:  # if unsuccessful
-        app.logger.debug("Failed to get User")
-        result = {"error": "Failed to get User",  # error message
-                  "status": ret  # status code from helper
-                  }
-        return flask.jsonify(result=result)  # return result to front end
-
-@app.route("/_getMsgs")
-def getMsgs():
-
-    app.logger.debug("_getAllmsgs")
-    # No arguments
-
-    msgs = mongo_getMsgs()  # Call to helper to retrieve all msgs, passes nothing
-
-    if len(msgs) > 0:  # if list contains msgs
-        app.logger.debug("Got msgs")
-        result = {
-            "message": "msgs Retrieved!",  # message for success
-            "num": len(msgs),  # number of msgs
-            "msgs": msgs,  # list of msgs
-            "status": 204  # status code for success
-        }
-        return flask.jsonify(result=result)  # return result to front end
+    result = mongo_addMsg(msg)
+    # On success, return the user's ID
+    if result != 412:
+        app.logger.debug("MSG ADDED")
+        return jsonify(result), 201
 
     else:
-        app.logger.debug("Retrieved No msgs")
-        result = {"error": "Retrieved No msgs",  # error message
-                  "status": 418  # error code
-                  }
-        return flask.jsonify(result=result)  # return result to front end
+        app.logger.debug("MSG FAILED TO ADD")
+        return jsonify(result)
 
 
-@app.route("/_getFieldList")
-def getFieldList():
+@app.route('/socialmap/api/delMsg', methods=['POST'])
+def delMsg():
+    app.logger.debug("ATTEMPT TO DELETE MSG")
+    app.logger.debug(request.json)
 
-    app.logger.debug("_getFieldList")
-    # Get request field
-    field = flask.request.args.get("field", type=str)  # name of field
+    token = request.json['token']
 
-    fieldList = mongo_getFieldList(field)  # Call helper to get list of values in field, passes field name
+    result = mongo_delMsg(token)
+    # On success, return the user's ID
+    if result != 412:
+        app.logger.debug("MSG DELETED")
+        return jsonify(result), 201
 
-    if len(fieldList) > 0:  # if list has values
-        app.logger.debug("Got List")
-        result = {
-            "message": "List Retrieved!",  # message for success
-            "num": len(fieldList),  # number of unique values
-            "list": fieldList,  # list of unique values
-            "status": 205  # status code for success
-        }
-        return flask.jsonify(result=result)  # return result to front end
-
-    else:  # if list was empty
-        app.logger.debug("Empty field list Returned")
-        result = {"error": "Empty Field List Returned",  # error message
-                  "status": 419  # error code
-                  }
-        return flask.jsonify(result=result)  # return result to front end
+    else:
+        app.logger.debug("MSG FAILED TO DELETE")
+        return jsonify(result)
 
 
-@app.route("/_clear")
-def clear():
-    """
-    Deletes all msgs in database:
-    Calls: helper function to delete all msgs.
-    Returns: status code based on if it was successful or not.
-    """
-    result = mongo_clear()  # Call helper function to clear database
+@app.route('/socialmap/api/delUser', methods=['POST'])
+def delUser():
+    app.logger.debug("ATTEMPT TO DELETE USER")
+    app.logger.debug(request.json)
 
+    token = request.json['token']
+
+    result = mongo_delUser(token)
+    # On success, return the user's ID
     if result == True:
-        app.logger.debug("All msgs deleted")
-        result = {"message": "All msgs Deleted",  # message for success
-                  "status": 206  # status code for success
-                  }
-        return flask.jsonify(result=result)  # return result to front end
+        app.logger.debug("USER DELETED")
+        return jsonify(result), 201
 
     else:
-        app.logger.debug("Not all msgs were deleted")
-        result = {"error": "Database is not Empty",  # error message
-                  "status": 420  # error code
-                  }
-        return flask.jsonify(result=result)  # return result to front end
+        app.logger.debug("USER FAILED TO DELETE")
+        return jsonify(result)
+
+
+@app.route('/socialmap/api/getMsgs', methods=['POST'])
+def getMsgs():
+    app.logger.debug("ATTEMPT TO USER MESSAGES")
+    app.logger.debug(request.json)
+
+    username = request.json['username']
+
+    result = mongo_getMsgs(username)
+    # On success, return the user's ID
+    if len(result) != 0:
+        app.logger.debug("USER MESSAGES RECIEVED")
+        return jsonify(result), 201
+
+    else:
+        app.logger.debug("GOT NO MESSAGES")
+        return jsonify(result)
+
+
+@app.route('/socialmap/api/clear', methods=['POST'])
+def clear():
+    app.logger.debug("ATTEMPT TO CLEAR DATABASE")
+    app.logger.debug(request.json)
+
+    result = mongo_clear()
+    # On success, return the user's ID
+    if result == True:
+        app.logger.debug("DATABASE CLEARED")
+        return jsonify(result), 201
+
+    else:
+        app.logger.debug("FAILED TO CLEAR DATABASE")
+        return jsonify(result)
 
 
 # Error page(s)
@@ -252,4 +189,5 @@ def server_error(error):
 if __name__ == "__main__":
     app.debug = CONFIG.DEBUG
     app.logger.setLevel(logging.DEBUG)
+    app.logger.debug(mongo_tempTest())
     app.run(port=CONFIG.PORT, host="localhost")
