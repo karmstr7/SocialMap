@@ -13,4 +13,8 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="btn_add_message">Add New Message To Map</string>
+    <string name="btn_view_friends">View Friends List</string>
+    <string name="btn_my_profile">View My Profile</string>
+    <string name="mapbox_token">pk.eyJ1IjoicXVpbm5taWwiLCJhIjoiY2poNndlc2NuMDEyODJwcGd4OWw5d2M0YyJ9.ld7OWGt932HW0ebcv8CZFw</string>
 </resources>

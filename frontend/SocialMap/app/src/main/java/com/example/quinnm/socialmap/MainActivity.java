@@ -10,7 +10,9 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.example.quinnm.socialmap.api.model.Message;
 import com.example.quinnm.socialmap.api.model.User;
+import com.example.quinnm.socialmap.api.service.MessageClient;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
