@@ -11,14 +11,45 @@
         android:layout_height="match_parent"
         mapbox:mapbox_cameraTargetLat="44.04665947871217"
         mapbox:mapbox_cameraTargetLng="-123.07640946242944"
-        mapbox:mapbox_styleUrl="mapbox://styles/mapbox/outdoors-v10"
-        mapbox:mapbox_cameraZoom="13" >
+        mapbox:mapbox_cameraZoom="15"
+        mapbox:mapbox_styleUrl="@string/mapbox_style_mapbox_streets">
 
-        <!--<Button-->
-            <!--android:id="@+id/button"-->
-            <!--android:layout_width="182dp"-->
-            <!--android:layout_height="99dp"-->
-            <!--android:text="Button" />-->
+        <ImageButton
+            android:id="@+id/btn_new_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/btn_create_message"
+            android:visibility="invisible"
+            mapbox:srcCompat="@drawable/ic_add_white_48dp" />
+
+        <ImageButton
+            android:id="@+id/btn_view_friends"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="64dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/btn_view_friends"
+            android:visibility="invisible"
+            mapbox:srcCompat="@drawable/ic_group_white_48dp" />
+
+        <ImageButton
+            android:id="@+id/btn_view_my_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="112dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/btn_my_profile"
+            android:visibility="invisible"
+            mapbox:srcCompat="@drawable/ic_person_outline_white_48dp" />
+
     </com.mapbox.mapboxsdk.maps.MapView>
 
 
