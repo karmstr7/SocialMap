@@ -17,4 +17,10 @@
     <string name="btn_view_friends">View Friends List</string>
     <string name="btn_my_profile">View My Profile</string>
     <string name="mapbox_token">pk.eyJ1IjoicXVpbm5taWwiLCJhIjoiY2poNndlc2NuMDEyODJwcGd4OWw5d2M0YyJ9.ld7OWGt932HW0ebcv8CZFw</string>
+    <string name="new_message_title">New Message</string>
+    <string name="new_message_hint">Write a new message</string>
+    <string name="btn_new_message_create">Create</string>
+    <string name="btn_new_message_cancel">Cancel</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
