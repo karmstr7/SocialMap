@@ -1,8 +1,12 @@
 package com.example.quinnm.socialmap;
 
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,8 +30,24 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+/**
+ * The main map view after the user has logged in.
+ * Loads map from Mapbox
+ * Single tap to activate toolbar, appear on top right.
+ *
+ * @author Keir Armstrong, Quinn Milinois
+ * @since May 13, 2018
+ *
+ * REFERENCES:
+ *  Mapbox API Reference
+ *      https://www.mapbox.com/android-docs/api/map-sdk/6.1.3/index.html
+ */
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+
+    private static final int REQUEST_ADD_MESSAGE_DIALOGFRAGMENT = 2;
+    private static final int REQUEST_VIEW_FIRENDS_ACTIVITY = 3;
+    private static final int REQUEST_VIEW_PROFILE_ACTIVITY = 4;
 
     private boolean toolbarVisible = false;
     private ImageButton _newMessageButton, _viewFriendsButton, _viewMyProfileButton;
@@ -39,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String MARKER_SOURCE = "markers-source";
     private static final String MARKER_STYLE_LAYER = "markers-style-layer";
     private static final String MARKER_IMAGE = "custom-marker";
+    private MapboxMap.OnMapClickListener addNewMarkerListener;
+    private boolean addMarkerMode = false;
 
     private static final int REQUEST_FINE_LOCATION_PERMISSION = 1;
     private LocationManager locationManager;
@@ -66,7 +88,10 @@ public class MainActivity extends AppCompatActivity {
                 mapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
                     @Override
                     public void onMapClick(@NonNull LatLng point) {
-                        setToolbarVisibility();
+                        // prevent toolbar toggling when adding marker
+                        if (!addMarkerMode) {
+                            setToolbarVisibility();
+                        }
                     }
                 });
 
@@ -76,23 +101,35 @@ public class MainActivity extends AppCompatActivity {
                 //        mapboxMap.addImage(MARKER_IMAGE, icon);
                 ////        addMarkers();
 
-                getMessages();
-
-                mapboxMap.addMarker(new MarkerOptions()
-                        // These coords aren't accurate
-                        .position(new LatLng(44.44, -123.07))
-                        .title("University of Oregon")
-                        .snippet("Eugene, Oregon"));
-
-                mapboxMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(35.20859, -106.449893))
-                        .title("Big Hike")
-                        .snippet("Sandia Crest"));
+//                getMessages();
+//
+//                mapboxMap.addMarker(new MarkerOptions()
+//                        // These coords aren't accurate
+//                        .position(new LatLng(44.44, -123.07))
+//                        .title("University of Oregon")
+//                        .snippet("Eugene, Oregon"));
+//
+//                mapboxMap.addMarker(new MarkerOptions()
+//                        .position(new LatLng(35.20859, -106.449893))
+//                        .title("Big Hike")
+//                        .snippet("Sandia Crest"));
             }
         });
 
+        // wait for user to choose where to create new message and marker
         _newMessageButton.setOnClickListener(
-                (View v) -> showNewMessageDialog()
+                (View v) -> {
+                    addMarkerMode = true;
+                    Toast.makeText(MainActivity.this, "Choose a point to add a new message", Toast.LENGTH_LONG).show();
+                    mapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
+                        @Override
+                        public void onMapClick(@NonNull LatLng point) {
+                            addNewMessage(point);
+                            mapboxMap.removeOnMapClickListener(this);
+                        }
+                    });
+                    addMarkerMode = false;
+                }
         );
 
         _viewFriendsButton.setOnClickListener(
@@ -118,16 +155,30 @@ public class MainActivity extends AppCompatActivity {
         toolbarVisible = !toolbarVisible;
     }
 
-    public void showNewMessageDialog() {
-        Toast.makeText(MainActivity.this, "Write a new message!", Toast.LENGTH_LONG).show();
+    public void addNewMessage(LatLng point) {
+        // TODO: DISABLE OUTSIDE AREA UNTIL CANCEL/CONFIRM
+        Toast.makeText(MainActivity.this, "Creating new marker at: " + point.toString(), Toast.LENGTH_LONG).show();
+        mapboxMap.addMarker(new MarkerOptions()
+            .position(point)
+                .title("Hello")
+                .snippet("World!")
+        );
+        addMarkerMode = false;
+        FragmentManager fm = getSupportFragmentManager();
+        NewMessageDialogFragment newMessageDialogFragment = NewMessageDialogFragment.newInstance("Some Title");
+        newMessageDialogFragment.show(fm, "fragment_edit_name");
     }
 
     public void showFriendsListDialog() {
         Toast.makeText(MainActivity.this, "friends list", Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(getApplicationContext(), ViewFriendsActivity.class);
+        MainActivity.this.startActivity(intent);
     }
 
     public void showMyProfileDialog() {
         Toast.makeText(MainActivity.this, "your info", Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(getApplicationContext(), ViewProfileActivity.class);
+        MainActivity.this.startActivity(intent);
     }
 
     public void getMessages() {
