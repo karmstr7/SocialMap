@@ -2,6 +2,7 @@ package com.example.quinnm.socialmap;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -13,6 +14,8 @@ import android.content.Intent;
 
 import com.example.quinnm.socialmap.api.model.User;
 import com.example.quinnm.socialmap.api.service.UserClient;
+
+import org.json.JSONObject;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -96,14 +99,25 @@ public class SignupActivity extends AppCompatActivity {
 
         call.enqueue(new Callback<User>() {
             @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                Toast.makeText(getBaseContext(), "Success" + response.body(), Toast.LENGTH_LONG).show();
-                progressDialog.dismiss();
-                onSignupSuccess();
+            public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                // might want to
+                if (response.body() != null && response.isSuccessful() && response.body().getErrorMsg().equals("")) {
+                    Toast.makeText(getBaseContext(),
+                            "Account created successfully!",
+                            Toast.LENGTH_LONG).show();
+                    progressDialog.dismiss();
+                    onSignupSuccess(response);
+                }
+                else {
+                    Toast.makeText(getBaseContext(),
+                            "ERROR: " + response.body().getErrorMsg(),
+                            Toast.LENGTH_LONG).show();
+                    progressDialog.dismiss();
+                    _signupButton.setEnabled(true);
+                }
             }
-
             @Override
-            public void onFailure(Call<User> call, Throwable t) {
+            public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
                 Toast.makeText(getBaseContext(), t.toString(), Toast.LENGTH_LONG).show();
                 progressDialog.dismiss();
                 _signupButton.setEnabled(true);
@@ -111,7 +125,13 @@ public class SignupActivity extends AppCompatActivity {
         });
     }
 
-    public void onSignupSuccess() {
+    public void onSignupSuccess(Response<User> userInfo) {
+        // load user info to global variable manager
+        ((ApplicationStore) this.getApplication()).setUsername(userInfo.body().getUsername());
+        ((ApplicationStore) this.getApplication()).setUserId(userInfo.body().getUserId());
+        // not implemented yet
+//        ((ApplicationStore) this.getApplication()).setDateCreated(userInfo.body().getDateCreated());
+
         _signupButton.setEnabled(true);
         setResult(RESULT_OK, null);
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
