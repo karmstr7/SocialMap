@@ -24,6 +24,8 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.MapView;
 
+import java.util.ArrayList;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -42,7 +44,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  *  Mapbox API Reference
  *      https://www.mapbox.com/android-docs/api/map-sdk/6.1.3/index.html
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NewMessageDialogFragment.NewMessageDialogListener{
     private static final String TAG = "MainActivity";
 
     private static final int REQUEST_ADD_MESSAGE_DIALOGFRAGMENT = 2;
@@ -61,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String MARKER_IMAGE = "custom-marker";
     private MapboxMap.OnMapClickListener addNewMarkerListener;
     private boolean addMarkerMode = false;
+    private LatLng currentPoint;
+    private ArrayList<LatLng> allMarkers = new ArrayList<>();
 
     private static final int REQUEST_FINE_LOCATION_PERMISSION = 1;
     private LocationManager locationManager;
@@ -124,11 +128,11 @@ public class MainActivity extends AppCompatActivity {
                     mapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
                         @Override
                         public void onMapClick(@NonNull LatLng point) {
-                            addNewMessage(point);
+                            currentPoint = point;
+                            onCreateNewMessage();
                             mapboxMap.removeOnMapClickListener(this);
                         }
                     });
-                    addMarkerMode = false;
                 }
         );
 
@@ -155,18 +159,11 @@ public class MainActivity extends AppCompatActivity {
         toolbarVisible = !toolbarVisible;
     }
 
-    public void addNewMessage(LatLng point) {
+    public void onCreateNewMessage() {
         // TODO: DISABLE OUTSIDE AREA UNTIL CANCEL/CONFIRM
-        Toast.makeText(MainActivity.this, "Creating new marker at: " + point.toString(), Toast.LENGTH_LONG).show();
-        mapboxMap.addMarker(new MarkerOptions()
-            .position(point)
-                .title("Hello")
-                .snippet("World!")
-        );
-        addMarkerMode = false;
         FragmentManager fm = getSupportFragmentManager();
         NewMessageDialogFragment newMessageDialogFragment = NewMessageDialogFragment.newInstance("Some Title");
-        newMessageDialogFragment.show(fm, "fragment_edit_name");
+        newMessageDialogFragment.show(fm, "NewMessageDialogFragment");
     }
 
     public void showFriendsListDialog() {
@@ -230,6 +227,18 @@ public class MainActivity extends AppCompatActivity {
 //                        PropertyFactory.iconImage(MARKER_IMAGE));
 //            mapboxMap.addLayer(markerStyleLayer);
 //    }
+
+    @Override
+    public void OnFinishNewMessage(String messageText) {
+        Toast.makeText(MainActivity.this, "Creating new marker at: " + currentPoint.toString(), Toast.LENGTH_LONG).show();
+        mapboxMap.addMarker(new MarkerOptions()
+                .position(currentPoint)
+                .snippet(messageText)
+        );
+        currentPoint = null;
+        addMarkerMode = false;
+    }
+
     @Override
     public void onStart() {
         super.onStart();
