@@ -5,12 +5,15 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.view.ContextThemeWrapper;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 // ...
 
@@ -28,9 +31,16 @@ import android.widget.EditText;
  *      https://guides.codepath.com/android/using-dialogfragment
  */
 
-public class NewMessageDialogFragment extends DialogFragment {
+public class NewMessageDialogFragment extends DialogFragment implements View.OnClickListener {
+    private static final int ACTION_CREATE = 1;
+    private static final int ACTION_CANCEL = 2;
+
     private EditText _messageText;
     private Button _createButton, _cancelButton;
+
+    public interface NewMessageDialogListener {
+        void OnFinishNewMessage(String messageText);
+    }
 
     public NewMessageDialogFragment() {
         // Empty constructor is required for DialogFragment
@@ -66,11 +76,7 @@ public class NewMessageDialogFragment extends DialogFragment {
         _createButton = view.findViewById(R.id.btn_create);
         _cancelButton = view.findViewById(R.id.btn_cancel);
 
-        _createButton.setOnClickListener(
-                (View v) -> {
-                    //do stuff
-                }
-        );
+        _createButton.setOnClickListener(this);
 
         _cancelButton.setOnClickListener(
                 (View v) -> dismiss()
@@ -82,4 +88,18 @@ public class NewMessageDialogFragment extends DialogFragment {
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
 
+    @Override
+    public void onClick(View v) {
+        String message = _messageText.getText().toString();
+
+        if (message.length() < 1) {
+            // warn user about minimal message size
+            Toast.makeText(getActivity().getBaseContext(), "Can't create empty message", Toast.LENGTH_SHORT).show();
+        }
+        else {
+            NewMessageDialogListener listener = (NewMessageDialogListener) getActivity();
+            listener.OnFinishNewMessage(_messageText.getText().toString());
+            dismiss();
+        }
+    }
 }
