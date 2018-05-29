@@ -20,6 +20,22 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+/**
+ * This is the Sign-up page.
+ * Requires username and password as input texts.
+ * Answers to a Sign-up button and a Login link.
+ * Redirects user to MainActivity on success
+ *
+ * @author Keir Armstrong
+ * @since May 13, 2018
+ *
+ * REFERENCES:
+ *  Kam Low - Basic Layout
+ *      https://sourcey.com/beautiful-android-login-and-signup-screens-with-material-design/
+ *  Future Studio - Retrofit Tutorial
+ *      https://www.youtube.com/watch?v=j7lRiTJ_-cI
+ */
+
 public class SignupActivity extends AppCompatActivity {
     private static final String TAG = "SignupActivity";
 
@@ -37,19 +53,13 @@ public class SignupActivity extends AppCompatActivity {
         _signupButton = findViewById(R.id.btn_signup);
         _loginLink = findViewById(R.id.link_login);
 
-        _signupButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                signup();
-            }
-        });
+        _signupButton.setOnClickListener(
+                (View v) -> signup()
+        );
 
-        _loginLink.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        _loginLink.setOnClickListener(
+                (View v) -> finish()
+        );
     }
 
     public void signup() {
