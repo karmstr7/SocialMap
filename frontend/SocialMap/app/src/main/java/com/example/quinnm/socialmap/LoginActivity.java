@@ -26,8 +26,23 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 
-// TODO: DISABLE BACKWARD BUTTON FROM GOING TO LOGIN PAGE, AFTER LOGGED IN (convenience issue)
+// TODO: DISABLE BACKWARD BUTTON FROM GOING BACK TO LOGIN PAGE AFTER LOGGED IN
 
+/**
+ * This is the Log-in page.
+ * Requests username and password.
+ * Answers to a Login button and a Create Account button.
+ * Redirects user to MainActivity on success
+ *
+ * @author Keir Armstrong
+ * @since May 13, 2018
+ *
+ * REFERENCES:
+ *  Kam Low - Basic Layout
+ *      https://sourcey.com/beautiful-android-login-and-signup-screens-with-material-design/
+ *  Future Studio - Retrofit Tutorial
+ *      https://www.youtube.com/watch?v=j7lRiTJ_-cI
+ */
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_SIGNUP = 0;
@@ -165,9 +180,3 @@ public class LoginActivity extends AppCompatActivity {
         return valid;
     }
 }
-
-/*
-Attributions
-Kam Low - Basic Layout - https://sourcey.com/beautiful-android-login-and-signup-screens-with-material-design/
-Future Studio - Network Connection - https://www.youtube.com/watch?v=j7lRiTJ_-cI
-*/
