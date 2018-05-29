@@ -2,6 +2,7 @@ package com.example.quinnm.socialmap;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.content.Intent;
@@ -117,14 +118,26 @@ public class LoginActivity extends AppCompatActivity {
 
         call.enqueue(new Callback<User>() {
             @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                Toast.makeText(getBaseContext(), "Success" + response.body(), Toast.LENGTH_LONG).show();
-                progressDialog.dismiss();
-                onLoginSuccess();
+            public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                if (response.body() != null && response.isSuccessful() && response.body().getErrorMsg().equals("")) {
+                    Toast.makeText(getBaseContext(),
+                            "Login successful",
+                            Toast.LENGTH_LONG).show();
+                    progressDialog.dismiss();
+                    onLoginSuccess();
+                }
+                else {
+                    Toast.makeText(getBaseContext(),
+                            "ERROR: " + response.body().getErrorMsg(),
+                            Toast.LENGTH_LONG).show();
+                    progressDialog.dismiss();
+                    _loginButton.setEnabled(true);
+                }
+
             }
 
             @Override
-            public void onFailure(Call<User> call, Throwable t) {
+            public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
                 Toast.makeText(getBaseContext(), t.toString(), Toast.LENGTH_LONG).show();
                 progressDialog.dismiss();
                 _loginButton.setEnabled(true);
