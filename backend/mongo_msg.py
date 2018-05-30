@@ -38,11 +38,11 @@ except:
 # Mongo msg Functions
 ###
 
-def mongo_login(act):
+def mongo_login(acc):
     """
     Reference: http://api.mongodb.com/python/current/api/pymongo/users.html
     """
-    record = users.find_one({"username": act["username"]})
+    record = users.find_one({"username": acc["username"]})
     result = {'username': '',
               'date_created': '',
               'friends': [],
@@ -54,7 +54,7 @@ def mongo_login(act):
         result['error_msg'] = "user not found"
         return result, result['error_msg']
 
-    if record['password'] != act['password']:
+    if record['password'] != acc['password']:
         result['error_msg'] = "password mismatch"
         return result, result['error_msg']
 
@@ -63,14 +63,14 @@ def mongo_login(act):
     result['friends'] = record['friends']
     result['user_id'] = record['user_id']
     result['messages'] = mongo_getMsgs(record['user_id'])
-    return result, "User Logged In"
+    return result, ""
 
 
-def mongo_signup(act):
+def mongo_signup(acc):
     """
     Reference: http://api.mongodb.com/python/current/api/pymongo/users.html
     """
-    record = users.find_one({"username": act["username"]})
+    record = users.find_one({"username": acc["username"]})
     result = {'username': '',
               'user_id': '',
               'date_created': '',
@@ -83,35 +83,19 @@ def mongo_signup(act):
         return result, result['error_msg']
 
     user_id = generate_key()
-    new_act = {
-        'username': act['username'],
-        'password': act['password'],
-        'date_created': act['date_created'],
+    new_acc = {
+        'username': acc['username'],
+        'password': acc['password'],
+        'date_created': acc['date_created'],
         'friends': [],
         'user_id': user_id
     }
-    users.insert_one(new_act)
+    users.insert_one(new_acc)
 
-    result['username'] = act['username']
+    result['username'] = acc['username']
     result['user_id'] = user_id
-    result['date_created'] = act['date_created']
-    return result, "User Signed Up"
-
-    # if record is None:
-    #     token = generate_key()      # generate unique token for new msg
-    #     new_act = {
-    #         "username": act["username"],    # Type: string
-    #         "password": act["password"],    # Type: string
-    #         "date_created": act["date_created"],    # Type: string
-    #         "friends": [],    # Type: list of strings
-    #         "token": token    # Type: string
-    #         }
-    #     result = users.insert_one(new_act)        # call to insert act below into database
-    #     if result.acknowledged is True:    # if add was successful
-    #         del new_act['_id']
-    #         return new_act
-    #
-    # return 412  # return error code for username already exists
+    result['date_created'] = acc['date_created']
+    return result, ""
 
 
 def mongo_addMsg(username, msg):
@@ -120,41 +104,41 @@ def mongo_addMsg(username, msg):
     """
 
     token = generate_key()
-    res = messages.insert_one(        # call to insert msg below into database
+    result = messages.insert_one(        # call to insert msg below into database
         {
-            "token": token,                 # Type: string
+            "message_id": token,                 # Type: string
             "username": username,
             "msg_data": msg["msg_data"],    # Type: dict
             "msg_body": msg["msg_body"]               # Type: string
         })
-    if res.acknowledged is not True:    # if add was unsuccessful
-        return 412      # return error code
+    if result.acknowledged is not True:    # if add was unsuccessful
+        return result, "Message Failed to Add"
     else:   # if add was successful
-        return token    # return token of added msg
+        return result, ""
 
 
-def mongo_delMsg(token):
+def mongo_delMsg(message_id):
     """
     Reference: http://api.mongodb.com/python/current/api/pymongo/users.html
     """
-    record = messages.find_one({"token": token})    # find msgs that have provided token
-    ret = messages.delete_one(record)     # delete found msg
-    if ret.deleted_count is 1:  # if successful
-        return True     # return True
+    record = messages.find_one({"message_id": message_id})    # find msgs that have provided token
+    result = messages.delete_one(record)     # delete found msg
+    if result.deleted_count is 1:  # if successful
+        return True, ""     # return True
     else:   # if unsuccessful
-        return False    # return False
+        return False, "Message Failed to Delete"
 
 
-def mongo_delUser(token):
+def mongo_delUser(user_id):
     """
     Reference: http://api.mongodb.com/python/current/api/pymongo/users.html
     """
-    record = users.find_one({"token": token})    # find msgs that have provided token
-    ret = users.delete_one(record)     # delete found msg
-    if ret.deleted_count is 1:  # if successful
-        return True     # return True
+    record = users.find_one({"user_id": user_id})    # find msgs that have provided token
+    result = users.delete_one(record)     # delete found msg
+    if result.deleted_count is 1:  # if successful
+        return True, ""
     else:   # if unsuccessful
-        return False    # return False
+        return False, "User Failed to Delete"
 
 def mongo_getMsgs(username):
     """
@@ -167,7 +151,27 @@ def mongo_getMsgs(username):
         records.append(record)  # add each msg to list
     # Sort the records by name:
     # records.sort(key=lambda i: i[field])    # sort list by value
-    return records  # return list
+    if len(records) == 0:
+        return records
+    else:
+        return records
+
+
+def mongo_getFriendMsgs(friends):
+    """
+    placeholder for get all messages
+    Reference: http://api.mongodb.com/python/current/api/pymongo/users.html
+    """
+    records = []
+    for friend in friends:
+        for message in mongo_getMsgs(friend):
+            records.append(message)
+    # Sort the records by name:
+    # records.sort(key=lambda i: i[field])    # sort list by value
+    if len(records) == 0:
+        return records, "No messages found"
+    else:
+        return records, ""
 
 def mongo_getFieldList(field, value):
     """
@@ -178,8 +182,12 @@ def mongo_getFieldList(field, value):
         del record['_id']
         records.append(record)  # add each msg to list
     # Sort the records by name:
-    records.sort(key=lambda i: i[field])    # sort list by value
-    return records  # return list
+    # records.sort(key=lambda i: i[field])    # sort list by
+
+    if len(records) == 0:
+        return records, "No messages found"
+    else:
+        return records, ""
 
 def mongo_getUniqueValues(field):
     """
@@ -187,7 +195,10 @@ def mongo_getUniqueValues(field):
     """
     all_types = users.distinct(field)  # call to get all unique values in specific field
     result = { field : all_types}
-    return result   # return all unique values found
+    if len(all_types) == 0:
+        return result, "No Unique Fields Found"
+    else:
+        return result, ""
 
 def mongo_clear():
     """
@@ -196,9 +207,9 @@ def mongo_clear():
     userResult = users.delete_many({})
     msgResult = messages.delete_many({})
     if userResult.acknowledged and msgResult.acknowledged == True:
-        return True
+        return True, ""
     else:
-        return False
+        return False, "Failed to clear Database"
 ###
 # Utility Functions
 ###
@@ -218,13 +229,15 @@ def mongo_tempTest():
     temp tests:
     """
 
-    assert mongo_clear() == True
+    result, error_msg = mongo_clear()
+    assert result == True and error_msg == ""
 
     testResults = {
         "signup" : False,
         "login" : False,
         "addMsg": False,
         "getMsgs": False,
+        "getFriendMsgs": False,
         "delMsg": False,
         "delUser": False,
         "clear": False
@@ -247,36 +260,46 @@ def mongo_tempTest():
         "msg_body": "Stuff here"
     }
 
-    result = mongo_signup(dummy1)
+    result, error_msg = mongo_signup(dummy1)
     assert result["username"] == dummy1["username"]
-    # assert len(mongo_getFieldList("username", "test1")) == 1
+    assert error_msg == ""
     resDummy = result
     testResults["signup"] = True
 
-    result = mongo_login(dummy1)
+    result, error_msg = mongo_login(dummy1)
     assert result["username"] == dummy1["username"]
-    result = mongo_login(dummy2)
-    assert result == 412
+    result, error_msg = mongo_login(dummy2)
+    assert error_msg != ""
     testResults["login"] = True
 
-    result = mongo_addMsg(dummy1["username"], message1)
-    assert result != 412
+    result, error_msg = mongo_addMsg(dummy1["username"], message1)
+    assert error_msg == ""
     testResults["addMsg"] = True
 
     result = mongo_getMsgs(dummy1["username"])
     assert len(result) == 1
     testResults["getMsgs"] = True
 
-    result = mongo_delMsg(result[0]["token"])
+    result, error_msg = mongo_addMsg(dummy2["username"], message1)
+    friends = [dummy1["username"], dummy2["username"]]
+    result, error_msg = mongo_getFriendMsgs(friends)
+    assert len(result) == 2
+    assert error_msg == ""
+    testResults["getFriendsMsgs"] = True
+
+    result, error_msg = mongo_delMsg(result[0]["message_id"])
     assert result == True
+    assert error_msg == ""
     testResults["delMsg"] = True
 
-    result = mongo_delUser(resDummy["token"])
+    result, error_msg = mongo_delUser(resDummy["user_id"])
     assert result == True
+    assert error_msg == ""
     testResults["delUser"] = True
 
-    result = mongo_clear()
+    result, error_msg = mongo_clear()
     assert result == True
+    assert error_msg == ""
     testResults["clear"] = True
 
     return testResults

@@ -18,7 +18,7 @@ app.secret_key = CONFIG.SECRET_KEY
 ###
 
 
-@app.route('/socialmap/api/login', methods=['POST'])
+@app.route('/socialmap/api/login', methods=['GET'])
 def login():
     app.logger.debug("ATTEMPT TO LOG IN USER")
     app.logger.debug(request.json)
@@ -26,14 +26,13 @@ def login():
     username = request.json['username']
     password = request.json['password']
 
-    act = {
+    acc = {
         'username': username,
         'password': password
     }
 
     # Verify user here
-    result, error_msg = mongo_login(act)
-    print(result)
+    result, error_msg = mongo_login(acc)
     app.logger.debug("ERROR DURING LOGIN: {}".format(error_msg))
     return jsonify(result), 200
 
@@ -47,27 +46,15 @@ def signup():
     password = request.json['password']
     # date = request.json['date_created']
 
-    act = {
+    acc = {
         'username': username,
         'password': password,
         'date_created': ''
     }
 
-    result, error_msg = mongo_signup(act)
-    print(result)
+    result, error_msg = mongo_signup(acc)
     app.logger.debug("ERROR DURING SIGNUP: {}".format(error_msg))
     return jsonify(result), 200
-
-    # # On success, return the user's ID
-    # if result != 412:
-    #     print('result {}'.format(result))
-    #     result["messages"] = []
-    #     app.logger.debug("USER CREATED")
-    #     return jsonify(result), 201
-    #
-    # else:
-    #     app.logger.debug("USER FAILED TO CREATE")
-    #     return jsonify(result)
 
 
 @app.route('/socialmap/api/addMsg', methods=['POST'])
@@ -86,15 +73,10 @@ def addMsg():
         "msg_body": msg_body
     }
 
-    result = mongo_addMsg(msg)
+    result, error_msg = mongo_addMsg(msg)
     # On success, return the user's ID
-    if result != 412:
-        app.logger.debug("MSG ADDED")
-        return jsonify(result), 201
-
-    else:
-        app.logger.debug("MSG FAILED TO ADD")
-        return jsonify(result)
+    app.logger.debug("ERROR DURING ADDMSG: {}".format(error_msg))
+    return jsonify({"result": result, "error_msg": error_msg}), 200
 
 
 @app.route('/socialmap/api/delMsg', methods=['POST'])
@@ -102,17 +84,12 @@ def delMsg():
     app.logger.debug("ATTEMPT TO DELETE MSG")
     app.logger.debug(request.json)
 
-    token = request.json['token']
+    message_id = request.json['message_id']
 
-    result = mongo_delMsg(token)
+    result, error_msg = mongo_delMsg(token)
     # On success, return the user's ID
-    if result != 412:
-        app.logger.debug("MSG DELETED")
-        return jsonify(result), 201
-
-    else:
-        app.logger.debug("MSG FAILED TO DELETE")
-        return jsonify(result)
+    app.logger.debug("ERROR DURING DELMSG: {}".format(error_msg))
+    return jsonify({"result": result, "error_msg": error_msg}), 200
 
 
 @app.route('/socialmap/api/delUser', methods=['POST'])
@@ -120,20 +97,15 @@ def delUser():
     app.logger.debug("ATTEMPT TO DELETE USER")
     app.logger.debug(request.json)
 
-    token = request.json['token']
+    user_id = request.json['user_id']
 
-    result = mongo_delUser(token)
+    result, error_msg = mongo_delUser(user_id)
     # On success, return the user's ID
-    if result == True:
-        app.logger.debug("USER DELETED")
-        return jsonify(result), 201
-
-    else:
-        app.logger.debug("USER FAILED TO DELETE")
-        return jsonify(result)
+    app.logger.debug("ERROR DURING DELUSER: {}".format(error_msg))
+    return jsonify({"result": result, "error_msg": error_msg}), 200
 
 
-@app.route('/socialmap/api/getMsgs', methods=['POST'])
+@app.route('/socialmap/api/getMsgs', methods=['GET'])
 def getMsgs():
     app.logger.debug("ATTEMPT TO USER MESSAGES")
     app.logger.debug(request.json)
@@ -141,14 +113,26 @@ def getMsgs():
     username = request.json['username']
 
     result = mongo_getMsgs(username)
-    # On success, return the user's ID
-    if len(result) != 0:
-        app.logger.debug("USER MESSAGES RECIEVED")
-        return jsonify(result), 201
-
+    if len(result) == 0:
+        error_msg = "No Messages Found"
     else:
-        app.logger.debug("GOT NO MESSAGES")
-        return jsonify(result)
+        error_msg = ""
+    # On success, return the user's ID
+    app.logger.debug("ERROR DURING GETMSGS: {}".format(error_msg))
+    return jsonify({"result": result, "error_msg": error_msg}), 200
+
+
+@app.route('/socialmap/api/getFriendMsgs', methods=['GET'])
+def getFriendMsgs():
+    app.logger.debug("ATTEMPT TO USER MESSAGES")
+    app.logger.debug(request.json)
+
+    friends = request.json['friends']
+
+    result, error_msg = mongo_getFriendMsgs(friends)
+    # On success, return the user's ID
+    app.logger.debug("ERROR DURING GETFRIENDMSGS: {}".format(error_msg))
+    return jsonify({"result": result, "error_msg": error_msg}), 200
 
 
 @app.route('/socialmap/api/clear', methods=['POST'])
@@ -156,15 +140,10 @@ def clear():
     app.logger.debug("ATTEMPT TO CLEAR DATABASE")
     app.logger.debug(request.json)
 
-    result = mongo_clear()
+    result, error_msg = mongo_clear()
     # On success, return the user's ID
-    if result == True:
-        app.logger.debug("DATABASE CLEARED")
-        return jsonify(result), 201
-
-    else:
-        app.logger.debug("FAILED TO CLEAR DATABASE")
-        return jsonify(result)
+    app.logger.debug("ERROR DURING CLEAR: {}".format(error_msg))
+    return jsonify({"result": result, "error_msg": error_msg}), 200
 
 
 # Error handlers
@@ -190,6 +169,6 @@ def server_error(error):
 
 if __name__ == "__main__":
     app.debug = CONFIG.DEBUG
-    # app.logger.setLevel(logging.DEBUG)
+    app.logger.setLevel(logging.DEBUG)
     # app.logger.debug(mongo_tempTest())
     app.run(port=CONFIG.PORT, host="localhost")
