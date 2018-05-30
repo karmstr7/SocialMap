@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/edit_name"
+    android:layout_width="250dp"
+    android:layout_height="300dp"
+    android:layout_gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/lbl_new_message"
+        android:layout_width="match_parent"
+        android:layout_height="25dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:text="@string/new_message_title"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/input_message"
+        android:layout_width="match_parent"
+        android:layout_height="225dp"
+        android:layout_marginBottom="50dp"
+        android:layout_marginTop="25dp"
+        android:imeOptions="actionDone"
+        android:inputType="text|textMultiLine|textLongMessage"
+        android:maxLength="120"
+        android:labelFor="@+id/txt_your_name"
+        android:hint="@string/new_message_hint"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/lbl_new_message" />
+
+    <Button
+        android:id="@+id/btn_create"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:text="@string/btn_new_message_create"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/btn_cancel"
+        app:layout_constraintTop_toBottomOf="@+id/input_message" />
+
+    <Button
+        android:id="@+id/btn_cancel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:text="@string/btn_new_message_cancel"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/btn_create"
+        app:layout_constraintRight_toRightOf="parent" />
+
+
+</android.support.constraint.ConstraintLayout>
