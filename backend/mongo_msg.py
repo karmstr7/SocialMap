@@ -273,10 +273,12 @@ def mongo_tempTest():
     testResults["login"] = True
 
     result, error_msg = mongo_addMsg(dummy1["username"], message1)
+    print(result)
     assert error_msg == ""
     testResults["addMsg"] = True
 
     result = mongo_getMsgs(dummy1["username"])
+    print(result)
     assert len(result) == 1
     testResults["getMsgs"] = True
 

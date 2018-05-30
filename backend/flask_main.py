@@ -76,7 +76,7 @@ def addMsg():
     result, error_msg = mongo_addMsg(msg)
     # On success, return the user's ID
     app.logger.debug("ERROR DURING ADDMSG: {}".format(error_msg))
-    return jsonify({"result": result, "error_msg": error_msg}), 200
+    return jsonify({"error_msg": error_msg}), 200
 
 
 @app.route('/socialmap/api/delMsg', methods=['POST'])
@@ -89,7 +89,7 @@ def delMsg():
     result, error_msg = mongo_delMsg(token)
     # On success, return the user's ID
     app.logger.debug("ERROR DURING DELMSG: {}".format(error_msg))
-    return jsonify({"result": result, "error_msg": error_msg}), 200
+    return jsonify({"error_msg": error_msg}), 200
 
 
 @app.route('/socialmap/api/delUser', methods=['POST'])
@@ -102,7 +102,7 @@ def delUser():
     result, error_msg = mongo_delUser(user_id)
     # On success, return the user's ID
     app.logger.debug("ERROR DURING DELUSER: {}".format(error_msg))
-    return jsonify({"result": result, "error_msg": error_msg}), 200
+    return jsonify({"error_msg": error_msg}), 200
 
 
 @app.route('/socialmap/api/getMsgs', methods=['GET'])
@@ -143,7 +143,7 @@ def clear():
     result, error_msg = mongo_clear()
     # On success, return the user's ID
     app.logger.debug("ERROR DURING CLEAR: {}".format(error_msg))
-    return jsonify({"result": result, "error_msg": error_msg}), 200
+    return jsonify({"error_msg": error_msg}), 200
 
 
 # Error handlers
