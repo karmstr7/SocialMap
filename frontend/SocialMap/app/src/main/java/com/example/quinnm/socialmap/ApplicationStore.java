@@ -33,6 +33,16 @@ public class ApplicationStore extends Application {
     private String dateCreated = "";
     private Map<String, List<String>> messages = new HashMap<>();
     private Map<String, List<String>> friends = new HashMap<>();
+    private int numberOfFriends = 0;
+    private int numberOfMessages = 0;
+
+    public void setNumberOfMessages(int numberOfMessages) {
+        this.numberOfMessages = numberOfMessages;
+    }
+
+    public void setNumberOfFriends(int numberOfFriends) {
+        this.numberOfFriends = numberOfFriends;
+    }
 
     public void setUsername(String username) {
         this.username = username;
@@ -46,15 +56,20 @@ public class ApplicationStore extends Application {
         this.dateCreated = dateCreated;
     }
 
-    public void addFriend(String friendId, List<String> friendInfo) {
-        this.friends.put(friendId, friendInfo);
-    }
     public void setFriends(Map<String, List<String>> friends) {
         this.friends = friends;
     }
 
+    public void addFriend(String friendId, List<String> friendInfo) {
+        this.friends.put(friendId, friendInfo);
+    }
+
     public void addMessage(String messageId, List<String> messageBody) {
         this.messages.put(messageId, messageBody);
+    }
+
+    public void increaseFriend() {
+        this.numberOfFriends++;
     }
 
     public void setMessages(Map<String, List<String>> messages) {
@@ -79,5 +94,13 @@ public class ApplicationStore extends Application {
 
     public Map<String, List<String>> getMessages() {
         return messages;
+    }
+
+    public int getNumberOfFriends() {
+        return numberOfFriends;
+    }
+
+    public int getNumberOfMessages() {
+        return numberOfMessages;
     }
 }
