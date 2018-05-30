@@ -111,11 +111,40 @@ def mongo_addMsg(username, msg):
             "msg_data": msg["msg_data"],    # Type: dict
             "msg_body": msg["msg_body"]               # Type: string
         })
+
     if result.acknowledged is not True:    # if add was unsuccessful
         return result, "Message Failed to Add"
     else:   # if add was successful
         return result, ""
 
+
+def mongo_addFriend(username, friend):
+
+    record = users.find_one({"username": friend})
+    if record is None:
+        return False, "friend not found"
+    user = users.find_one({"username": username})
+    user["friends"].append(friend)
+    result = users.find_one_and_replace({"username": username}, user)
+
+    if result != user:
+        return True, ""
+    else:
+        return False, "Failed to Add Friend"
+
+def mongo_delFriend(username, friend):
+
+    record = users.find_one({"username": friend})
+    if record is None:
+        return False, "friend not found"
+    user = users.find_one({"username": username})
+    user["friends"].remove(friend)
+    result = users.find_one_and_replace({"username": username}, user)
+
+    if result != user:
+        return True, ""
+    else:
+        return False, "Failed to Add Friend"
 
 def mongo_delMsg(message_id):
     """
@@ -139,6 +168,7 @@ def mongo_delUser(user_id):
         return True, ""
     else:   # if unsuccessful
         return False, "User Failed to Delete"
+
 
 def mongo_getMsgs(username):
     """
@@ -173,6 +203,7 @@ def mongo_getFriendMsgs(friends):
     else:
         return records, ""
 
+
 def mongo_getFieldList(field, value):
     """
     Reference: http://api.mongodb.com/python/current/api/pymongo/users.html
@@ -189,6 +220,7 @@ def mongo_getFieldList(field, value):
     else:
         return records, ""
 
+
 def mongo_getUniqueValues(field):
     """
     Reference: http://api.mongodb.com/python/current/api/pymongo/users.html
@@ -199,6 +231,7 @@ def mongo_getUniqueValues(field):
         return result, "No Unique Fields Found"
     else:
         return result, ""
+
 
 def mongo_clear():
     """
@@ -235,6 +268,8 @@ def mongo_tempTest():
     testResults = {
         "signup" : False,
         "login" : False,
+        "addFriend" : False,
+        "delFriend" : False,
         "addMsg": False,
         "getMsgs": False,
         "getFriendMsgs": False,
@@ -272,13 +307,25 @@ def mongo_tempTest():
     assert error_msg != ""
     testResults["login"] = True
 
+    result, error_msg = mongo_addFriend(dummy1["username"], dummy2["username"])
+    assert result == False
+    assert error_msg != ""
+    result, error_msg = mongo_signup(dummy2)
+    result, error_msg = mongo_addFriend(dummy1["username"], dummy2["username"])
+    assert result == True
+    assert error_msg == ""
+    testResults["addFriend"] = True
+
+    result, error_msg = mongo_delFriend(dummy1["username"], dummy2["username"])
+    assert result == True
+    assert error_msg == ""
+    testResults["delFriend"] = True
+
     result, error_msg = mongo_addMsg(dummy1["username"], message1)
-    print(result)
     assert error_msg == ""
     testResults["addMsg"] = True
 
     result = mongo_getMsgs(dummy1["username"])
-    print(result)
     assert len(result) == 1
     testResults["getMsgs"] = True
 

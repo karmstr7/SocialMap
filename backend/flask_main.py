@@ -44,12 +44,12 @@ def signup():
 
     username = request.json['username']
     password = request.json['password']
-    # date = request.json['date_created']
+    date = request.json['date_created']
 
     acc = {
         'username': username,
         'password': password,
-        'date_created': ''
+        'date_created': date
     }
 
     result, error_msg = mongo_signup(acc)
@@ -65,7 +65,6 @@ def addMsg():
     username = request.json['username']
     msg_data = request.json['msg_data']
     msg_body = request.json['msg_body']
-    # date = request.json['date_created']
 
     msg = {
         "username": username,
@@ -76,6 +75,34 @@ def addMsg():
     result, error_msg = mongo_addMsg(msg)
     # On success, return the user's ID
     app.logger.debug("ERROR DURING ADDMSG: {}".format(error_msg))
+    return jsonify({"error_msg": error_msg}), 200
+
+
+@app.route('/socialmap/api/addFriend', methods=['POST'])
+def addFriend():
+    app.logger.debug("ATTEMPT TO ADD MSG")
+    app.logger.debug(request.json)
+
+    username = request.json['username']
+    friend = request.json['friend']
+
+    result, error_msg = mongo_addFriend(username, friend)
+    # On success, return the user's ID
+    app.logger.debug("ERROR DURING ADDFRIEND: {}".format(error_msg))
+    return jsonify({"error_msg": error_msg}), 200
+
+
+@app.route('/socialmap/api/delFriend', methods=['POST'])
+def delFriend():
+    app.logger.debug("ATTEMPT TO ADD MSG")
+    app.logger.debug(request.json)
+
+    username = request.json['username']
+    friend = request.json['friend']
+
+    result, error_msg = mongo_delFriend(username, friend)
+    # On success, return the user's ID
+    app.logger.debug("ERROR DURING DELFRIEND: {}".format(error_msg))
     return jsonify({"error_msg": error_msg}), 200
 
 
@@ -124,7 +151,7 @@ def getMsgs():
 
 @app.route('/socialmap/api/getFriendMsgs', methods=['GET'])
 def getFriendMsgs():
-    app.logger.debug("ATTEMPT TO USER MESSAGES")
+    app.logger.debug("ATTEMPT TO FRIEND MESSAGES")
     app.logger.debug(request.json)
 
     friends = request.json['friends']
