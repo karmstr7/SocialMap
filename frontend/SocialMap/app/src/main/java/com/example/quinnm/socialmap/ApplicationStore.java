@@ -13,10 +13,10 @@ import java.util.Map;
  * Application-wide variables are stored here.
  * Each variable has publicly exposed getter and setter methods.
  * To instantiate the store from an Activity, use the following:
- *      // get
+ *      // set
  *      ((ApplicationStore) this.getApplication()).setSomeVariable("foo");
  *
- *      // set
+ *      // get
  *      String s = ((ApplicationStore) this.getApplication()).getSomeVariable();
  *
  * @author Keir Armstrong

@@ -71,6 +71,9 @@ public class MainActivity extends AppCompatActivity implements NewMessageDialogF
     private String locationProvider;
     private Location lastKnownLocation;
 
+    private String userID = ((ApplicationStore) this.getApplication()).getUserId();
+    private String userName = ((ApplicationStore) this.getApplication()).getUsername();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,6 +92,10 @@ public class MainActivity extends AppCompatActivity implements NewMessageDialogF
             public void onMapReady(MapboxMap mapboxMap) {
                 MainActivity.this.mapboxMap = mapboxMap;
 
+//                TODO DEBUG THIS
+//                getMessages();
+
+
                 mapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
                     @Override
                     public void onMapClick(@NonNull LatLng point) {
@@ -99,24 +106,7 @@ public class MainActivity extends AppCompatActivity implements NewMessageDialogF
                     }
                 });
 
-                //        Image: an image is loaded an added to the map
-                //        Bitmap icon = BitmapFactory.decodeResource(
-                //                MainActivity.this.getResources(), R.drawable.custom_marker);
-                //        mapboxMap.addImage(MARKER_IMAGE, icon);
-                ////        addMarkers();
 
-//                getMessages();
-//
-//                mapboxMap.addMarker(new MarkerOptions()
-//                        // These coords aren't accurate
-//                        .position(new LatLng(44.44, -123.07))
-//                        .title("University of Oregon")
-//                        .snippet("Eugene, Oregon"));
-//
-//                mapboxMap.addMarker(new MarkerOptions()
-//                        .position(new LatLng(35.20859, -106.449893))
-//                        .title("Big Hike")
-//                        .snippet("Sandia Crest"));
             }
         });
 
@@ -200,6 +190,30 @@ public class MainActivity extends AppCompatActivity implements NewMessageDialogF
             }
         });
     }
+    public void addMessages(String userID, String Username, String Body, String Location){
+        Retrofit.Builder builder = new Retrofit.Builder()
+                .baseUrl("localhost:8000/socialmap/api/")
+                .addConverterFactory(GsonConverterFactory.create());
+
+        Retrofit retrofit = builder.build();
+
+        Message testMessage = new Message(userID,Username,Body,Location);
+
+        MessageClient client = retrofit.create(MessageClient.class);
+        Call<Message> call = client.addMessage(testMessage);
+
+        call.enqueue(new Callback<Message>() {
+            @Override
+            public void onResponse(Call<Message> call, Response<Message> response) {
+
+            }
+
+            @Override
+            public void onFailure(Call<Message> call, Throwable t) {
+                Toast.makeText(getBaseContext(), t.toString(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
 
 //msg=
 //    {
@@ -210,31 +224,17 @@ public class MainActivity extends AppCompatActivity implements NewMessageDialogF
 //    }
 
 
-    //    private void addMarkers(){
-//        List<Feature> features = new ArrayList<>();
-//        /* Source: A data source specifies the geographic coordinate where the image marker gets placed. */
-////        ^ from Mapbox SDK
-//        features.add(Feature.fromGeometry(Point.fromCoordinates(new double[] {-123.07640946242944,44.04665947871217})));
-//        FeatureCollection featureCollection = FeatureCollection.fromFeatures(features);
-//        GeoJsonSource source = new GeoJsonSource(MARKER_SOURCE, featureCollection);
-//        mapboxMap.addSource(source);
-//
-//        /* Style layer: A style layer ties together the source and image and specifies how they are displayed on the map. */
-//
-//        SymbolLayer markerStyleLayer = new SymbolLayer(MARKER_STYLE_LAYER, MARKER_SOURCE)
-//                .withProperties(
-//                        PropertyFactory.iconAllowOverlap(true),
-//                        PropertyFactory.iconImage(MARKER_IMAGE));
-//            mapboxMap.addLayer(markerStyleLayer);
-//    }
-
     @Override
     public void OnFinishNewMessage(String messageText) {
+//        String userID;
+//        String userName;
         Toast.makeText(MainActivity.this, "Creating new marker at: " + currentPoint.toString(), Toast.LENGTH_LONG).show();
         mapboxMap.addMarker(new MarkerOptions()
                 .position(currentPoint)
                 .snippet(messageText)
         );
+        addMessages(userID,userName,messageText,currentPoint.toString());
+
         currentPoint = null;
         addMarkerMode = false;
     }
