@@ -71,8 +71,9 @@ public class MainActivity extends AppCompatActivity implements NewMessageDialogF
     private String locationProvider;
     private Location lastKnownLocation;
 
-    private String userID = ((ApplicationStore) this.getApplication()).getUserId();
-    private String userName = ((ApplicationStore) this.getApplication()).getUsername();
+    private String userID;
+    private String userName;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +84,9 @@ public class MainActivity extends AppCompatActivity implements NewMessageDialogF
         _newMessageButton = findViewById(R.id.btn_new_message);
         _viewFriendsButton = findViewById(R.id.btn_view_friends);
         _viewMyProfileButton = findViewById(R.id.btn_view_my_profile);
+
+        userID = ((ApplicationStore) this.getApplication()).getUserId();
+        userName = ((ApplicationStore) this.getApplication()).getUsername();
 
         Mapbox.getInstance(this, getString(R.string.mapbox_token));
         mapView = findViewById(R.id.mapView);
@@ -170,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements NewMessageDialogF
 
     public void getMessages() {
         Retrofit.Builder builder = new Retrofit.Builder()
-                .baseUrl("localhost:8000/socialmap/api/")
+                .baseUrl("http://10.0.2.2:8000/socialmap/api/")
                 .addConverterFactory(GsonConverterFactory.create());
 
         Retrofit retrofit = builder.build();
@@ -192,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements NewMessageDialogF
     }
     public void addMessages(String userID, String Username, String Body, String Location){
         Retrofit.Builder builder = new Retrofit.Builder()
-                .baseUrl("localhost:8000/socialmap/api/")
+                .baseUrl("http://10.0.2.2:8000/socialmap/api/")
                 .addConverterFactory(GsonConverterFactory.create());
 
         Retrofit retrofit = builder.build();

@@ -12,4 +12,16 @@ public interface UserClient {
 
     @POST("signup")
     Call<User> createAccount(@Body User user);
+
+    @POST("getFriendsList")
+    Call<User> getFriendsList(@Body User user);
+
+    @POST("addFriend")
+    Call<User> addFriend(@Body User user);
+
+    @POST("defFriend")
+    Call<User> delFriend(@Body User user);
+
+
+
 }
