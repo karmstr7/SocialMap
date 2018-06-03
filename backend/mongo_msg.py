@@ -33,7 +33,6 @@ except:
     print("Failure opening database. Is Mongo running? Correct password?")
     sys.exit(1)
 
-
 ###
 # Mongo msg Functions
 ###
@@ -62,7 +61,7 @@ def mongo_login(acc):
     result['date_created'] = record['date_created']
     result['friends'] = record['friends']
     result['user_id'] = record['user_id']
-    result['messages'] = mongo_getMsgs(record['user_id'])
+    result['messages'] = mongo_getMsgs(record['username'], record["friends"])
     return result, ""
 
 
@@ -132,6 +131,7 @@ def mongo_addFriend(username, friend):
     else:
         return False, "Failed to Add Friend"
 
+
 def mongo_delFriend(username, friend):
 
     record = users.find_one({"username": friend})
@@ -145,6 +145,7 @@ def mongo_delFriend(username, friend):
         return True, ""
     else:
         return False, "Failed to Add Friend"
+
 
 def mongo_delMsg(message_id):
     """
@@ -170,7 +171,7 @@ def mongo_delUser(user_id):
         return False, "User Failed to Delete"
 
 
-def mongo_getMsgs(username):
+def mongo_getMsgs(username, friends):
     """
     placeholder for get all messages
     Reference: http://api.mongodb.com/python/current/api/pymongo/users.html
@@ -179,22 +180,10 @@ def mongo_getMsgs(username):
     for record in messages.find({"username": username}):  # call to find msgs with share the value in specific field
         del record['_id']
         records.append(record)  # add each msg to list
-    # Sort the records by name:
-    # records.sort(key=lambda i: i[field])    # sort list by value
-    if len(records) == 0:
-        return records
-    else:
-        return records
 
-
-def mongo_getFriendMsgs(friends):
-    """
-    placeholder for get all messages
-    Reference: http://api.mongodb.com/python/current/api/pymongo/users.html
-    """
-    records = []
     for friend in friends:
-        for message in mongo_getMsgs(friend):
+        for message in messages.find({"username": friend}):
+            del message['_id']
             records.append(message)
     # Sort the records by name:
     # records.sort(key=lambda i: i[field])    # sort list by value
@@ -272,7 +261,6 @@ def mongo_tempTest():
         "delFriend" : False,
         "addMsg": False,
         "getMsgs": False,
-        "getFriendMsgs": False,
         "delMsg": False,
         "delUser": False,
         "clear": False
@@ -325,16 +313,13 @@ def mongo_tempTest():
     assert error_msg == ""
     testResults["addMsg"] = True
 
-    result = mongo_getMsgs(dummy1["username"])
+    result, error_msg = mongo_getMsgs(dummy1["username"], [])
     assert len(result) == 1
-    testResults["getMsgs"] = True
-
-    result, error_msg = mongo_addMsg(dummy2["username"], message1)
-    friends = [dummy1["username"], dummy2["username"]]
-    result, error_msg = mongo_getFriendMsgs(friends)
-    assert len(result) == 2
     assert error_msg == ""
-    testResults["getFriendsMsgs"] = True
+    result, error_msg = mongo_addMsg(dummy2["username"], message1)
+    result, error_msg = mongo_getMsgs("", [dummy1["username"], dummy2["username"]])
+    assert len(result) == 2
+    testResults["getMsgs"] = True
 
     result, error_msg = mongo_delMsg(result[0]["message_id"])
     assert result == True

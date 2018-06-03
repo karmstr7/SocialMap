@@ -80,7 +80,7 @@ def addMsg():
 
 @app.route('/socialmap/api/addFriend', methods=['POST'])
 def addFriend():
-    app.logger.debug("ATTEMPT TO ADD MSG")
+    app.logger.debug("ATTEMPT TO ADD FRIEND")
     app.logger.debug(request.json)
 
     username = request.json['username']
@@ -94,7 +94,7 @@ def addFriend():
 
 @app.route('/socialmap/api/delFriend', methods=['POST'])
 def delFriend():
-    app.logger.debug("ATTEMPT TO ADD MSG")
+    app.logger.debug("ATTEMPT TO DELETE FRIEND")
     app.logger.debug(request.json)
 
     username = request.json['username']
@@ -138,27 +138,12 @@ def getMsgs():
     app.logger.debug(request.json)
 
     username = request.json['username']
-
-    result = mongo_getMsgs(username)
-    if len(result) == 0:
-        error_msg = "No Messages Found"
-    else:
-        error_msg = ""
-    # On success, return the user's ID
-    app.logger.debug("ERROR DURING GETMSGS: {}".format(error_msg))
-    return jsonify({"result": result, "error_msg": error_msg}), 200
-
-
-@app.route('/socialmap/api/getFriendMsgs', methods=['GET'])
-def getFriendMsgs():
-    app.logger.debug("ATTEMPT TO FRIEND MESSAGES")
-    app.logger.debug(request.json)
-
     friends = request.json['friends']
 
-    result, error_msg = mongo_getFriendMsgs(friends)
+    result, error_msg = mongo_getMsgs(username, friends)
+
     # On success, return the user's ID
-    app.logger.debug("ERROR DURING GETFRIENDMSGS: {}".format(error_msg))
+    app.logger.debug("ERROR DURING GETMSGS: {}".format(error_msg))
     return jsonify({"result": result, "error_msg": error_msg}), 200
 
 
