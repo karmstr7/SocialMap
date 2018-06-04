@@ -244,12 +244,6 @@ public class MainActivity extends AppCompatActivity implements
     public void OnFinishNewMessage(String messageText) {
         String username = ((ApplicationStore) this.getApplication()).getUsername();
 
-//        mapboxMap.addMarker(new CustomMarkerOptions()
-//                .markerId("69")
-//                .position(currentPoint)
-//                .snippet(messageText)
-//        );
-
         AddMessage addMessage = new AddMessage(
                 username,
                 messageText,
