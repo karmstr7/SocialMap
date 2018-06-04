@@ -1,5 +1,6 @@
 package com.example.quinnm.socialmap;
 
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -78,9 +79,17 @@ public class ViewFriendsActivity extends AppCompatActivity {
         });
     }
     public void deleteFriends(){
+//        todo
+    }
 
+    public void onAddFriend() {
+        // TODO: DISABLE OUTSIDE AREA UNTIL CANCEL/CONFIRM
+        FragmentManager fm = getSupportFragmentManager();
+        AddFriendFragment addFriendDialogFragment = AddFriendFragment.newInstance("Some Title");
+        addFriendDialogFragment.show(fm, "addFriendDialogFragment");
     }
 }
+
 
 
 
