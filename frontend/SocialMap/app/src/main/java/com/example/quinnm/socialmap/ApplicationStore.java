@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * Application-wide variables are stored here.
  * Each variable has publicly exposed getter and setter methods.
- * To instantiate the store from an Activity, use the following:
+ * To use the store from an Activity, use the following:
  *      // get
  *      ((ApplicationStore) this.getApplication()).setSomeVariable("foo");
  *
@@ -31,8 +31,18 @@ public class ApplicationStore extends Application {
     private String username = "";
     private String userId = "";
     private String dateCreated = "";
-    private Map<String, List<String>> messages = new HashMap<>();
-    private Map<String, List<String>> friends = new HashMap<>();
+    private List<String> friends = new ArrayList<>();
+    private List<Map<String, Object>> messages = new ArrayList<>();
+    private int numberOfFriends = 0;
+    private int numberOfMessages = 0;
+
+    public void setNumberOfMessages(int numberOfMessages) {
+        this.numberOfMessages = numberOfMessages;
+    }
+
+    public void setNumberOfFriends(int numberOfFriends) {
+        this.numberOfFriends = numberOfFriends;
+    }
 
     public void setUsername(String username) {
         this.username = username;
@@ -46,18 +56,23 @@ public class ApplicationStore extends Application {
         this.dateCreated = dateCreated;
     }
 
-    public void addFriend(String friendId, List<String> friendInfo) {
-        this.friends.put(friendId, friendInfo);
-    }
-    public void setFriends(Map<String, List<String>> friends) {
+    public void setFriends(List<String> friends) {
         this.friends = friends;
     }
 
-    public void addMessage(String messageId, List<String> messageBody) {
-        this.messages.put(messageId, messageBody);
+    public void addFriend(String friend) {
+        this.friends.add(friend);
     }
 
-    public void setMessages(Map<String, List<String>> messages) {
+    public void addMessage(Map<String, Object> message) {
+        this.messages.add(message);
+    }
+
+    public void increaseFriend() {
+        this.numberOfFriends++;
+    }
+
+    public void setMessages(List<Map<String, Object>> messages) {
         this.messages = messages;
     }
 
@@ -73,11 +88,19 @@ public class ApplicationStore extends Application {
         return dateCreated;
     }
 
-    public Map<String, List<String>> getFriends() {
+    public List<String> getFriends() {
         return friends;
     }
 
-    public Map<String, List<String>> getMessages() {
+    public List<Map<String, Object>> getMessages() {
         return messages;
+    }
+
+    public int getNumberOfFriends() {
+        return numberOfFriends;
+    }
+
+    public int getNumberOfMessages() {
+        return numberOfMessages;
     }
 }

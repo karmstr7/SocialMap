@@ -23,4 +23,10 @@
     <string name="btn_new_message_cancel">Cancel</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="viewProfile_showUsername">Username: %1$s</string>
+    <string name="viewProfile_showAccountDate">Since: %1$s</string>
+    <string name="viewProfile_showNumberMessages">Number of Messages: %1$d</string>
+    <string name="viewProfile_showNumberFriends">Number of Friends: %1$d</string>
+    <string name="viewProfile_deleteAccount">Delete Account</string>
+    <string name="viewProfile_signOut">Sign Out</string>
 </resources>

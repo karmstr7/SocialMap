@@ -2,6 +2,7 @@ package com.example.quinnm.socialmap;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -11,8 +12,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.content.Intent;
 
+import com.example.quinnm.socialmap.api.model.Registration;
 import com.example.quinnm.socialmap.api.model.User;
+import com.example.quinnm.socialmap.api.service.RegistrationClient;
 import com.example.quinnm.socialmap.api.service.UserClient;
+
+import org.json.JSONObject;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.Year;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -20,9 +34,26 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+/**
+ * This is the Sign-up page.
+ * Requires username and password as input texts.
+ * Answers to a Sign-up button and a Login link.
+ * Redirects user to MainActivity on success
+ *
+ * @author Keir Armstrong
+ * @since May 13, 2018
+ *
+ * REFERENCES:
+ *  Kam Low - Basic Layout
+ *      https://sourcey.com/beautiful-android-login-and-signup-screens-with-material-design/
+ *  Future Studio - Retrofit Tutorial
+ *      https://www.youtube.com/watch?v=j7lRiTJ_-cI
+ */
+
 public class SignupActivity extends AppCompatActivity {
     private static final String TAG = "SignupActivity";
-
+    private List<String> daysOfMonth = Arrays.asList(
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec");
     EditText _username, _password;
     Button _signupButton;
     TextView _loginLink;
@@ -37,19 +68,13 @@ public class SignupActivity extends AppCompatActivity {
         _signupButton = findViewById(R.id.btn_signup);
         _loginLink = findViewById(R.id.link_login);
 
-        _signupButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                signup();
-            }
-        });
+        _signupButton.setOnClickListener(
+                (View v) -> signup()
+        );
 
-        _loginLink.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        _loginLink.setOnClickListener(
+                (View v) -> finish()
+        );
     }
 
     public void signup() {
@@ -62,9 +87,16 @@ public class SignupActivity extends AppCompatActivity {
 
         _signupButton.setEnabled(false);
 
-        User user = new User(
+        Calendar calendar = Calendar.getInstance();
+        int cDay = calendar.get(Calendar.DAY_OF_MONTH);
+        int cMonth = calendar.get(Calendar.MONTH);
+        int cYear = calendar.get(Calendar.YEAR);
+        String date = dayOfMonthToString(cMonth) + " " + Integer.toString(cDay) + ", " + Integer.toString(cYear);
+
+        Registration registration = new Registration(
                 _username.getText().toString(),
-                _password.getText().toString()
+                _password.getText().toString(),
+                date
         );
 
         final ProgressDialog progressDialog = new ProgressDialog(SignupActivity.this,
@@ -81,19 +113,30 @@ public class SignupActivity extends AppCompatActivity {
 
         Retrofit retrofit = builder.build();
 
-        UserClient client = retrofit.create(UserClient.class);
-        Call<User> call = client.createAccount(user);
+        RegistrationClient client = retrofit.create(RegistrationClient.class);
+        Call<Registration> call = client.createAccount(registration);
 
-        call.enqueue(new Callback<User>() {
+        call.enqueue(new Callback<Registration>() {
             @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                Toast.makeText(getBaseContext(), "Success" + response.body(), Toast.LENGTH_LONG).show();
-                progressDialog.dismiss();
-                onSignupSuccess();
+            public void onResponse(@NonNull Call<Registration> call, @NonNull Response<Registration> response) {
+                // might want to
+                if (response.body() != null && response.isSuccessful() && response.body().getErrorMsg().equals("")) {
+                    Toast.makeText(getBaseContext(),
+                            "Account created successfully!",
+                            Toast.LENGTH_LONG).show();
+                    progressDialog.dismiss();
+                    onSignupSuccess(response);
+                }
+                else {
+                    Toast.makeText(getBaseContext(),
+                            "ERROR: " + response.body().getErrorMsg(),
+                            Toast.LENGTH_LONG).show();
+                    progressDialog.dismiss();
+                    _signupButton.setEnabled(true);
+                }
             }
-
             @Override
-            public void onFailure(Call<User> call, Throwable t) {
+            public void onFailure(@NonNull Call<Registration> call, @NonNull Throwable t) {
                 Toast.makeText(getBaseContext(), t.toString(), Toast.LENGTH_LONG).show();
                 progressDialog.dismiss();
                 _signupButton.setEnabled(true);
@@ -101,7 +144,13 @@ public class SignupActivity extends AppCompatActivity {
         });
     }
 
-    public void onSignupSuccess() {
+    public void onSignupSuccess(Response<Registration> userInfo) {
+        // load user info to global variable manager
+        ((ApplicationStore) this.getApplication()).setUsername(userInfo.body().getUsername());
+        ((ApplicationStore) this.getApplication()).setUserId(userInfo.body().getUserId());
+        // not implemented yet
+        ((ApplicationStore) this.getApplication()).setDateCreated(userInfo.body().getDateCreated());
+
         _signupButton.setEnabled(true);
         setResult(RESULT_OK, null);
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
@@ -134,5 +183,9 @@ public class SignupActivity extends AppCompatActivity {
         }
 
         return valid;
+    }
+
+    private String dayOfMonthToString(int dayOfMonth) {
+        return daysOfMonth.get(dayOfMonth);
     }
 }

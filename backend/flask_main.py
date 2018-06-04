@@ -12,6 +12,7 @@ CONFIG = config.configuration()
 app = flask.Flask(__name__)
 app.secret_key = CONFIG.SECRET_KEY
 
+mongo_clear()
 
 ###
 # REST API SERVICE
@@ -27,23 +28,15 @@ def login():
     password = request.json['password']
 
     act = {
-        "username": username,
-        "password": password,
+        'username': username,
+        'password': password
     }
 
     # Verify user here
-    result = mongo_login(act)
-    # Get messages of user
-    if len(result) != 0:
-        result["messages"] = mongo_getMsgs(result["username"])
-
-    # On success, return the user's ID
-    if result != 412:
-        app.logger.debug("USER LOGGED IN")
-        return jsonify(result), 201
-    else:
-        app.logger.debug("LOGIN FAILED")
-        return jsonify(result)
+    result, error_msg = mongo_login(act)
+    print(result)
+    app.logger.debug("ERROR DURING LOGIN: {}".format(error_msg))
+    return jsonify(result), 200
 
 
 @app.route('/socialmap/api/signup', methods=['POST'])
@@ -53,24 +46,29 @@ def signup():
 
     username = request.json['username']
     password = request.json['password']
-    # date = request.json['date_created']
+    date = request.json['date_created']
 
     act = {
-        "username": username,
-        "password": password,
-        "date_created": ""
+        'username': username,
+        'password': password,
+        'date_created': date
     }
 
-    result = mongo_signup(act)
-    # On success, return the user's ID
-    if result != 412:
-        result["messages"] = []
-        app.logger.debug("USER CREATED")
-        return jsonify(result), 201
+    result, error_msg = mongo_signup(act)
+    print(result)
+    app.logger.debug("ERROR DURING SIGNUP: {}".format(error_msg))
+    return jsonify(result), 200
 
-    else:
-        app.logger.debug("USER FAILED TO CREATE")
-        return jsonify(result)
+    # # On success, return the user's ID
+    # if result != 412:
+    #     print('result {}'.format(result))
+    #     result["messages"] = []
+    #     app.logger.debug("USER CREATED")
+    #     return jsonify(result), 201
+    #
+    # else:
+    #     app.logger.debug("USER FAILED TO CREATE")
+    #     return jsonify(result)
 
 
 @app.route('/socialmap/api/addMsg', methods=['POST'])
@@ -81,23 +79,16 @@ def addMsg():
     username = request.json['username']
     msg_data = request.json['msg_data']
     msg_body = request.json['msg_body']
-    # date = request.json['date_created']
 
     msg = {
-        "username": username,
         "msg_data": msg_data,
         "msg_body": msg_body
     }
 
-    result = mongo_addMsg(msg)
-    # On success, return the user's ID
-    if result != 412:
-        app.logger.debug("MSG ADDED")
-        return jsonify(result), 201
+    result, error_msg = mongo_addMsg(username, msg)
 
-    else:
-        app.logger.debug("MSG FAILED TO ADD")
-        return jsonify(result)
+    app.logger.debug("ERROR DURING ADDMSG: {}".format(error_msg))
+    return jsonify(result), 200
 
 
 @app.route('/socialmap/api/delMsg', methods=['POST'])
@@ -142,16 +133,15 @@ def getMsgs():
     app.logger.debug(request.json)
 
     username = request.json['username']
+    friends = request.json['friends']
 
-    result = mongo_getMsgs(username)
+    result, error_msg = mongo_getMsgs(username, friends)
+
+    print(result)
+
     # On success, return the user's ID
-    if len(result) != 0:
-        app.logger.debug("USER MESSAGES RECIEVED")
-        return jsonify(result), 201
-
-    else:
-        app.logger.debug("GOT NO MESSAGES")
-        return jsonify(result)
+    app.logger.debug("ERROR DURING GETMSGS: {}".format(error_msg))
+    return jsonify({"result": result, "error_msg": error_msg}), 200
 
 
 @app.route('/socialmap/api/clear', methods=['POST'])
@@ -170,15 +160,20 @@ def clear():
         return jsonify(result)
 
 
-# Error page(s)
-@app.errorhandler(404)
-def not_found(error):
-    return make_response(jsonify({'error': 'Not Found'}), 404)
-
-
+# Error handlers
 @app.errorhandler(400)
 def format_error(error):
-    return make_response(jsonify({'error': 'Invalid format'}),400)
+    return make_response(jsonify({'error': 'Invalid format'}), 400)
+
+
+@app.errorhandler(403)
+def forbidden_error(error):
+    return make_response(jsonify({'error': 'Forbidden'}), 403)
+
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return make_response(jsonify({'error': 'Not Found'}), 404)
 
 
 @app.errorhandler(500)
@@ -188,6 +183,6 @@ def server_error(error):
 
 if __name__ == "__main__":
     app.debug = CONFIG.DEBUG
-    app.logger.setLevel(logging.DEBUG)
-    app.logger.debug(mongo_tempTest())
+    # app.logger.setLevel(logging.DEBUG)
+    # app.logger.debug(mongo_tempTest())
     app.run(port=CONFIG.PORT, host="localhost")

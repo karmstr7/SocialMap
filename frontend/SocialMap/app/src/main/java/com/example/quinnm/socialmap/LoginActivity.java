@@ -2,6 +2,7 @@ package com.example.quinnm.socialmap;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.content.Intent;
@@ -26,8 +27,23 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 
-// TODO: DISABLE BACKWARD BUTTON FROM GOING TO LOGIN PAGE, AFTER LOGGED IN (convenience issue)
+// TODO: DISABLE BACKWARD BUTTON FROM GOING BACK TO LOGIN PAGE AFTER LOGGED IN
 
+/**
+ * This is the Log-in page.
+ * Requests username and password.
+ * Answers to a Login button and a Create Account button.
+ * Redirects user to MainActivity on success
+ *
+ * @author Keir Armstrong
+ * @since May 13, 2018
+ *
+ * REFERENCES:
+ *  Kam Low - Basic Layout
+ *      https://sourcey.com/beautiful-android-login-and-signup-screens-with-material-design/
+ *  Future Studio - Retrofit Tutorial
+ *      https://www.youtube.com/watch?v=j7lRiTJ_-cI
+ */
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_SIGNUP = 0;
@@ -102,19 +118,37 @@ public class LoginActivity extends AppCompatActivity {
 
         call.enqueue(new Callback<User>() {
             @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                Toast.makeText(getBaseContext(), "Success" + response.body(), Toast.LENGTH_LONG).show();
-                progressDialog.dismiss();
-                onLoginSuccess();
+            public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                if (response.body() != null && response.isSuccessful() && response.body().getErrorMsg().equals("")) {
+                    Toast.makeText(getBaseContext(),
+                            "Login successful",
+                            Toast.LENGTH_LONG).show();
+                    progressDialog.dismiss();
+                    loadUserInfo(response);
+                }
+                else {
+                    Toast.makeText(getBaseContext(),
+                            "ERROR: " + response.body().getErrorMsg(),
+                            Toast.LENGTH_LONG).show();
+                    progressDialog.dismiss();
+                    _loginButton.setEnabled(true);
+                }
+
             }
 
             @Override
-            public void onFailure(Call<User> call, Throwable t) {
+            public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
                 Toast.makeText(getBaseContext(), t.toString(), Toast.LENGTH_LONG).show();
                 progressDialog.dismiss();
                 _loginButton.setEnabled(true);
             }
         });
+    }
+
+    public void loadUserInfo(Response<User> userResponse) {
+        ((ApplicationStore) this.getApplication()).setUsername(userResponse.body().getUsername());
+        ((ApplicationStore) this.getApplication()).setUserId(userResponse.body().getUserId());
+        onLoginSuccess();
     }
 
     public void onLoginSuccess() {
@@ -165,9 +199,3 @@ public class LoginActivity extends AppCompatActivity {
         return valid;
     }
 }
-
-/*
-Attributions
-Kam Low - Basic Layout - https://sourcey.com/beautiful-android-login-and-signup-screens-with-material-design/
-Future Studio - Network Connection - https://www.youtube.com/watch?v=j7lRiTJ_-cI
-*/

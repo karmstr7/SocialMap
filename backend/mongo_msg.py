@@ -1,5 +1,3 @@
-
-
 import sys
 from pymongo import MongoClient  # Mongo database
 import config  # Get config settings from credentials file
@@ -45,35 +43,60 @@ def mongo_login(act):
     Reference: http://api.mongodb.com/python/current/api/pymongo/users.html
     """
     record = users.find_one({"username": act["username"]})
-    if record is not None and record["password"] == act["password"] :
-        del record["_id"]
-        record["messages"] = mongo_getMsgs(record["token"])
-        return record    # return token of Correct Account
-    else:
-        return 412      # return error code
+    result = {'username': '',
+              'date_created': '',
+              'friends': [],
+              'user_id': '',
+              'messages': [],
+              'error_msg': ''}
+
+    if record is None:
+        result['error_msg'] = "user not found"
+        return result, result['error_msg']
+
+    if record['password'] != act['password']:
+        result['error_msg'] = "password mismatch"
+        return result, result['error_msg']
+
+    result['username'] = record['username']
+    result['date_created'] = record['date_created']
+    result['friends'] = record['friends']
+    result['user_id'] = record['user_id']
+    # result['messages'] = mongo_getMsgs(record['user_id'])
+    return result, "User Logged In"
+
 
 def mongo_signup(act):
     """
     Reference: http://api.mongodb.com/python/current/api/pymongo/users.html
     """
     record = users.find_one({"username": act["username"]})
-    if record == None:
-        token = generate_key()      # generate unique token for new msg
+    result = {'username': '',
+              'user_id': '',
+              'date_created': '',
+              'friends': [],
+              'error_msg': ''}
 
-        newAct=     {
-                        "username": act["username"],    # Type: string
-                        "password": act["password"],    # Type: string
-                        "date_created": act["date_created"],    # Type: string
-                        "friends": [],    # Type: list of strings
-                        "token": token    # Type: string
-                    }
+    # if user already exists,
+    if record is not None:
+        result['error_msg'] = "user already exists"
+        return result, result['error_msg']
 
-        result = users.insert_one(newAct)        # call to insert act below into database
+    user_id = generate_key()
+    new_act = {
+        'username': act['username'],
+        'password': act['password'],
+        'date_created': act['date_created'],
+        'friends': [],
+        'user_id': user_id
+    }
+    users.insert_one(new_act)
 
-        if result.acknowledged is True:    # if add was successful
-            return newAct
+    result['username'] = act['username']
+    result['user_id'] = user_id
+    result['date_created'] = act['date_created']
+    return result, "User Signed Up"
 
-    return 412 #  return error code for username already exists
 
 def mongo_addMsg(username, msg):
     """
@@ -81,17 +104,25 @@ def mongo_addMsg(username, msg):
     """
 
     token = generate_key()
-    res = messages.insert_one(        # call to insert msg below into database
+    add_to_database = messages.insert_one(        # call to insert msg below into database
         {
-            "token": token,                 # Type: string
+            "message_id": token,                 # Type: string
             "username": username,
             "msg_data": msg["msg_data"],    # Type: dict
             "msg_body": msg["msg_body"]               # Type: string
         })
-    if res.acknowledged is not True:    # if add was unsuccessful
-        return 412      # return error code
+
+    result = {
+        'message_id': token,
+        'msg_body': msg["msg_body"],
+        'error_msg': ""
+    }
+
+    if add_to_database.acknowledged is not True:    # if add was unsuccessful
+        result['error_msg'] = "Message Failed to Add"
+        return result, result['error_msg']
     else:   # if add was successful
-        return token    # return token of added msg
+        return result, result['error_msg']
 
 
 def mongo_delMsg(token):
@@ -117,7 +148,8 @@ def mongo_delUser(token):
     else:   # if unsuccessful
         return False    # return False
 
-def mongo_getMsgs(username):
+
+def mongo_getMsgs(username, friends):
     """
     placeholder for get all messages
     Reference: http://api.mongodb.com/python/current/api/pymongo/users.html
@@ -126,9 +158,15 @@ def mongo_getMsgs(username):
     for record in messages.find({"username": username}):  # call to find msgs with share the value in specific field
         del record['_id']
         records.append(record)  # add each msg to list
+
+    for friend in friends:
+        for message in messages.find({"username": friend}):
+            del message['_id']
+            records.append(message)
     # Sort the records by name:
     # records.sort(key=lambda i: i[field])    # sort list by value
-    return records  # return list
+    return records, ""
+
 
 def mongo_getFieldList(field, value):
     """
