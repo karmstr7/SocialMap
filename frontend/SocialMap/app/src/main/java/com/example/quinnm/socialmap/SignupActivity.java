@@ -108,7 +108,7 @@ public class SignupActivity extends AppCompatActivity {
         // Server connection
         // 10.0.2.2 here is replacing the "localhost" or "127.0.0.1" address of the machine hosting the emulator.
         Retrofit.Builder builder = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:8000/socialmap/api/")
+                .baseUrl(getString(R.string.base_url))
                 .addConverterFactory(GsonConverterFactory.create());
 
         Retrofit retrofit = builder.build();

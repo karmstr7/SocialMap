@@ -143,10 +143,16 @@ def mongo_delUser(token):
     """
     record = users.find_one({"token": token})    # find msgs that have provided token
     ret = users.delete_one(record)     # delete found msg
+
+    result = {
+        'error_msg': ''
+    }
+
     if ret.deleted_count is 1:  # if successful
-        return True     # return True
+        return result # return True
     else:   # if unsuccessful
-        return False    # return False
+        result['error_msg'] = "Could not delete account"
+        return result    # return False
 
 
 def mongo_getMsgs(username, friends):

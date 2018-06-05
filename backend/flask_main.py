@@ -12,8 +12,6 @@ CONFIG = config.configuration()
 app = flask.Flask(__name__)
 app.secret_key = CONFIG.SECRET_KEY
 
-mongo_clear()
-
 ###
 # REST API SERVICE
 ###
@@ -114,17 +112,19 @@ def delUser():
     app.logger.debug("ATTEMPT TO DELETE USER")
     app.logger.debug(request.json)
 
-    token = request.json['token']
+    user_id = request.json['user_id']
 
-    result = mongo_delUser(token)
+    result = mongo_delUser(user_id)
+
     # On success, return the user's ID
-    if result == True:
-        app.logger.debug("USER DELETED")
-        return jsonify(result), 201
-
-    else:
-        app.logger.debug("USER FAILED TO DELETE")
-        return jsonify(result)
+    return jsonify(result), 200
+    # if result is True:
+    #     app.logger.debug("USER DELETED")
+    #     return jsonify(result), 200
+    #
+    # else:
+    #     app.logger.debug("USER FAILED TO DELETE")
+    #     return jsonify(result)
 
 
 @app.route('/socialmap/api/getMsgs', methods=['POST'])

@@ -1,34 +1,27 @@
 package com.example.quinnm.socialmap;
 
-import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Camera;
 import android.location.Location;
 import android.location.LocationListener;
-import android.location.LocationManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.quinnm.socialmap.api.model.AddMessage;
 import com.example.quinnm.socialmap.api.model.GetMessage;
-import com.example.quinnm.socialmap.api.model.Message;
 import com.example.quinnm.socialmap.api.model.User;
 import com.example.quinnm.socialmap.api.service.MessageClient;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mapbox.android.core.location.LocationEngine;
+import com.mapbox.android.core.location.LocationEngineListener;
+import com.mapbox.android.core.location.LocationEnginePriority;
+import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -38,8 +31,10 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.MapView;
+import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
+import com.mapbox.mapboxsdk.plugins.locationlayer.modes.CameraMode;
+import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,40 +57,33 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * REFERENCES:
  *  Mapbox API Reference
  *      https://www.mapbox.com/android-docs/api/map-sdk/6.1.3/index.html
+ *  Adding User Location to Mapbox
+ *      https://www.youtube.com/watch?v=2rclnd8OKHU
  */
 public class MainActivity extends AppCompatActivity implements
         NewMessageDialogFragment.NewMessageDialogListener,
         OnMapReadyCallback,
-        MapboxMap.OnMapClickListener {
+        MapboxMap.OnMapClickListener,
+        LocationEngineListener,
+        PermissionsListener{
 
     private static final String TAG = "MainActivity";
-
-    private static final int REQUEST_ADD_MESSAGE_DIALOGFRAGMENT = 2;
-    private static final int REQUEST_VIEW_FIRENDS_ACTIVITY = 3;
-    private static final int REQUEST_VIEW_PROFILE_ACTIVITY = 4;
 
     private boolean toolbarVisible = false;
     private ImageButton _newMessageButton, _viewFriendsButton, _viewMyProfileButton;
 
+    // TODO: REMOVE THIS BEFORE SUBMITTING
     private static final User DEFAULT_USER = new User("root","root");
 
     private MapView mapView;
     private MapboxMap mapboxMap;
-    private static final double DEFAULT_LATITUDE = 44.04665947871217;
-    private static final double DEFAULT_LONGITUDE = -123.07640946242944;
-    private static final String MARKER_SOURCE = "markers-source";
-    private static final String MARKER_STYLE_LAYER = "markers-style-layer";
-    private static final String MARKER_IMAGE = "custom-marker";
-    private MapboxMap.OnMapClickListener addNewMarkerListener;
     private boolean addMarkerMode = false;
     private LatLng currentPoint;
-    private ArrayList<LatLng> allMarkers = new ArrayList<>();
     private LocationEngine locationEngine;
     private LocationListener locationListener;
     private PermissionsManager permissionsManager;
-
-    private static final int PERMISSIONS_REQUEST_FINE_LOCATION = 1;
-    private Location lastKnownLocation;
+    private LocationLayerPlugin locationLayerPlugin;
+    private Location originLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,8 +123,6 @@ public class MainActivity extends AppCompatActivity implements
         _viewMyProfileButton.setOnClickListener(
                 (View v) -> showMyProfileDialog()
         );
-
-        //        initLocationService();
     }
 
     public void setToolbarVisibility() {
@@ -154,20 +140,19 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     public void onCreateNewMessage() {
-        // TODO: DISABLE OUTSIDE AREA UNTIL CANCEL/CONFIRM
         FragmentManager fm = getSupportFragmentManager();
-        NewMessageDialogFragment newMessageDialogFragment = NewMessageDialogFragment.newInstance("Some Title");
+        NewMessageDialogFragment newMessageDialogFragment = NewMessageDialogFragment.newInstance("New Message");
         newMessageDialogFragment.show(fm, "NewMessageDialogFragment");
     }
 
     public void showFriendsListDialog() {
-        Toast.makeText(MainActivity.this, "friends list", Toast.LENGTH_LONG).show();
+        Toast.makeText(MainActivity.this, "View Friends List", Toast.LENGTH_LONG).show();
         Intent intent = new Intent(getApplicationContext(), ViewFriendsActivity.class);
         MainActivity.this.startActivity(intent);
     }
 
     public void showMyProfileDialog() {
-        Toast.makeText(MainActivity.this, "your info", Toast.LENGTH_LONG).show();
+        Toast.makeText(MainActivity.this, "View Profile", Toast.LENGTH_LONG).show();
         Intent intent = new Intent(getApplicationContext(), ViewProfileActivity.class);
         MainActivity.this.startActivity(intent);
     }
@@ -182,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements
         );
 
         Retrofit.Builder builder = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:8000/socialmap/api/")
+                .baseUrl(getString(R.string.base_url))
                 .addConverterFactory(GsonConverterFactory.create());
 
         Retrofit retrofit = builder.build();
@@ -220,6 +205,8 @@ public class MainActivity extends AppCompatActivity implements
         List<Map<String, Object>> messages = response.body().getMessages();
         int listSize = messages.size();
 
+        ((ApplicationStore) this.getApplication()).setNumberOfMessages(listSize);
+
         for (int i = 0; i < listSize; i++) {
             double lat, lng;
 
@@ -251,7 +238,7 @@ public class MainActivity extends AppCompatActivity implements
         );
 
         Retrofit.Builder builder = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:8000/socialmap/api/")
+                .baseUrl(getString(R.string.base_url))
                 .addConverterFactory(GsonConverterFactory.create());
 
         Retrofit retrofit = builder.build();
@@ -287,6 +274,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void onAddMessageResponse(@NonNull Response<AddMessage> response) {
+        ((ApplicationStore) this.getApplication()).incrementNumberOfMessages();
         mapboxMap.addMarker(new CustomMarkerOptions()
                 .markerId(response.body().getMessageId())
                 .position(currentPoint)
@@ -299,8 +287,55 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
         MainActivity.this.mapboxMap = mapboxMap;
+        enableLocation();
+
         getMessages();
         mapboxMap.addOnMapClickListener(this);
+    }
+
+    private void enableLocation() {
+        if (PermissionsManager.areLocationPermissionsGranted(this)) {
+            initializeLocationEngine();
+            initializeLocationLayer();
+        }
+        else {
+            permissionsManager = new PermissionsManager(this);
+            permissionsManager.requestLocationPermissions(this);
+        }
+    }
+
+    @SuppressWarnings("MissingPermission")
+    private void initializeLocationEngine() {
+        locationEngine = new LocationEngineProvider(this).obtainBestLocationEngineAvailable();
+        locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
+        locationEngine.activate();
+
+        Location lastLocation = locationEngine.getLastLocation();
+        if (lastLocation != null) {
+            originLocation = lastLocation;
+            setCameraPosition(lastLocation);
+        }
+        else {
+            locationEngine.addLocationEngineListener(this);
+        }
+    }
+
+    private void initializeLocationLayer() {
+        locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap, locationEngine);
+        locationLayerPlugin.setLocationLayerEnabled(true);
+        locationLayerPlugin.setCameraMode(CameraMode.TRACKING);
+        locationLayerPlugin.setRenderMode(RenderMode.NORMAL);
+    }
+
+    private void setCameraPosition(Location location) {
+        CameraPosition position = new CameraPosition.Builder()
+                .target(new LatLng(location.getLatitude(), location.getLongitude()))
+                .tilt(30)
+                .zoom(15)
+                .build();
+
+        mapboxMap.animateCamera(CameraUpdateFactory
+                .newCameraPosition(position));
     }
 
     @Override
@@ -308,14 +343,37 @@ public class MainActivity extends AppCompatActivity implements
         if (!addMarkerMode) {
             setToolbarVisibility();
         }
-//        CameraPosition position = new CameraPosition.Builder()
-//                .target(new LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE))
-//                .zoom(15)
-//                .tilt(30)
-//                .build();
-//
-//        mapboxMap.animateCamera(CameraUpdateFactory
-//            .newCameraPosition(position), 5000);
+    }
+
+    @Override
+    @SuppressWarnings("MissingPermission")
+    public void onConnected() {
+        locationEngine.requestLocationUpdates();
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        if (location != null) {
+            originLocation = location;
+            setCameraPosition(location);
+        }
+    }
+
+    @Override
+    public void onExplanationNeeded(List<String> permissionToExplain) {
+        // Toast or Dialog
+    }
+
+    @Override
+    public void onPermissionResult(boolean granted) {
+        if (granted) {
+            enableLocation();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, int[] grantResults) {
+        permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override

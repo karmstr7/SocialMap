@@ -1,5 +1,6 @@
 package com.example.quinnm.socialmap.api.service;
 
+import com.example.quinnm.socialmap.api.model.DeleteUser;
 import com.example.quinnm.socialmap.api.model.User;
 
 import retrofit2.Call;
@@ -12,4 +13,7 @@ public interface UserClient {
 
     @POST("signup")
     Call<User> createAccount(@Body User user);
+
+    @POST("delUser")
+    Call<DeleteUser> deleteAccount(@Body DeleteUser deleteUser);
 }

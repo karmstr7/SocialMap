@@ -1,10 +1,22 @@
 package com.example.quinnm.socialmap;
 
+import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.example.quinnm.socialmap.api.model.DeleteUser;
+import com.example.quinnm.socialmap.api.service.UserClient;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ViewProfileActivity extends AppCompatActivity {
     private TextView _usernameTextView, _accountDateTextView, _numberMessagesTextView, _numberFriendsTextView;
@@ -35,7 +47,7 @@ public class ViewProfileActivity extends AppCompatActivity {
 
         _username = ((ApplicationStore) this.getApplication()).getUsername();
         _accountDate = ((ApplicationStore) this.getApplication()).getDateCreated();
-        _numberOfMessages = ((ApplicationStore) this.getApplication()).getNumberOfFriends();
+        _numberOfMessages = ((ApplicationStore) this.getApplication()).getNumberOfMessages();
         _numberOfFriends = ((ApplicationStore) this.getApplication()).getNumberOfFriends();
 
         displayProfileValues();
@@ -49,10 +61,58 @@ public class ViewProfileActivity extends AppCompatActivity {
     }
 
     private void onDeleteClick() {
+        _deleteAccountButton.setEnabled(false);
 
+        String userId = ((ApplicationStore) this.getApplication()).getUserId();
+
+        DeleteUser deleteUser = new DeleteUser(
+                userId
+        );
+
+        Retrofit.Builder builder = new Retrofit.Builder()
+                .baseUrl(getString(R.string.base_url))
+                .addConverterFactory(GsonConverterFactory.create());
+
+        Retrofit retrofit = builder.build();
+
+        UserClient client = retrofit.create(UserClient.class);
+        Call<DeleteUser> call = client.deleteAccount(deleteUser);
+
+        call.enqueue(new Callback<DeleteUser>() {
+            @Override
+            public void onResponse(@NonNull Call<DeleteUser> call, @NonNull Response<DeleteUser> response) {
+                // might want to
+                if (response.body() != null && response.isSuccessful() && response.body().getErrorMsg().equals("")) {
+                    Toast.makeText(getBaseContext(),
+                            "Account has been deleted",
+                            Toast.LENGTH_LONG).show();
+                    onAccountDeleteSuccess();
+                }
+                else {
+                    Toast.makeText(getBaseContext(),
+                            "ERROR: " + response.body().getErrorMsg(),
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+            @Override
+            public void onFailure(@NonNull Call<DeleteUser> call, @NonNull Throwable t) {
+                Toast.makeText(getBaseContext(), t.toString(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void onAccountDeleteSuccess() {
+        _deleteAccountButton.setEnabled(true);
+        setResult(RESULT_OK, null);
+        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+        ViewProfileActivity.this.startActivity(intent);
+        finish();
     }
 
     private void onSignOutClick() {
-
+        setResult(RESULT_OK, null);
+        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+        ViewProfileActivity.this.startActivity(intent);
+        finish();
     }
 }
