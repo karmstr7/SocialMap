@@ -100,11 +100,53 @@ def delMsg():
     # On success, return the user's ID
     if result != 412:
         app.logger.debug("MSG DELETED")
-        return jsonify(result), 201
+        return jsonify(result), 200
 
     else:
         app.logger.debug("MSG FAILED TO DELETE")
-        return jsonify(result)
+        return jsonify(result), 200
+
+
+@app.route('/socialmap/api/addFriend', methods=['POST'])
+def addFriend():
+    app.logger.debug("ATTEMPT TO ADD FRIEND")
+    app.logger.debug(request.json)
+
+    username = request.json['username']
+    friend = request.json['friend']
+
+    result, error_msg = mongo_addFriend(username, friend)
+    # On success, return the user's ID
+    app.logger.debug("ERROR DURING ADDFRIEND: {}".format(error_msg))
+    return jsonify({"error_msg": error_msg}), 200
+
+
+@app.route('/socialmap/api/delFriend', methods=['POST'])
+def delFriend():
+    app.logger.debug("ATTEMPT TO DELETE FRIEND")
+    app.logger.debug(request.json)
+
+    username = request.json['username']
+    friend = request.json['friend']
+
+    result, error_msg = mongo_delFriend(username, friend)
+    # On success, return the user's ID
+    app.logger.debug("ERROR DURING DELFRIEND: {}".format(error_msg))
+    return jsonify({"error_msg": error_msg}), 200
+
+@app.route('/socialmap/api/getFriends', methods = ['POST'])
+def getFriends():
+    app.logger.debug("ATTEMPT TO GET FRIENDS")
+
+    app.logger.debug(request.json)
+
+    username = request.json['username']
+
+    result = mongo_getFriends(username)
+    app.logger.debug(result)
+
+    return jsonify(result), 200
+
 
 
 @app.route('/socialmap/api/delUser', methods=['POST'])

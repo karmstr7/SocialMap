@@ -30,4 +30,7 @@
     <string name="viewProfile_deleteAccount">Delete Account</string>
     <string name="viewProfile_signOut">Sign Out</string>
     <string name="base_url">http://10.0.2.2:8000/socialmap/api/</string>
+    <string name="hint_add_username" >Enter Username</string>
+    <string name="Friend_title">Add Friend</string>
+    <string name="NewFriend_hint">Enter Friends Username</string>
 </resources>
