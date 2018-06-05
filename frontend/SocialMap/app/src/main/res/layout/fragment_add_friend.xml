@@ -6,43 +6,60 @@
     android:layout_width="250dp"
     android:layout_height="300dp"
     android:layout_gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:layout_editor_absoluteX="67dp"
+    tools:layout_editor_absoluteY="187dp">
 
-<!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Add Friend" />
+    <!-- TODO: Update blank fragment layout -->
 
     <EditText
         android:id="@+id/id_friendName"
-        android:layout_width="220dp"
-        android:layout_height="48dp"
-        android:ems="10"
-        android:hint="Enter Username"
-        android:inputType="textPersonName"
+        android:layout_width="match_parent"
+        android:layout_height="225dp"
+        android:layout_marginBottom="50dp"
+        android:layout_marginTop="25dp"
+        android:hint="@string/NewFriend_hint"
+        android:imeOptions="actionDone"
+        android:inputType="text|textMultiLine|textLongMessage"
+        android:labelFor="@+id/txt_your_name"
+        android:maxLength="120"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="57dp" />
+        app:layout_constraintTop_toTopOf="@+id/lbl_new_message" />
 
-    <Button
-        android:id="@+id/addButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Add"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <TextView
+        android:id="@+id/lbl_new_message2"
+        android:layout_width="match_parent"
+        android:layout_height="25dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:text="@string/Friend_title"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/cancelButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="CANCEL "
-        app:layout_constraintEnd_toEndOf="parent"
+        android:id="@+id/_addButton"
+        android:layout_width="154dp"
+        android:layout_height="52dp"
+        android:layout_marginStart="2dp"
+        android:text="Add"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/_cancelButton"
         app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="200dp" />
+        app:layout_constraintTop_toBottomOf="@+id/id_friendName"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/_cancelButton"
+        android:layout_width="87dp"
+        android:layout_height="51dp"
+        android:text="CANCEL "
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/_addButton"
+        app:layout_constraintTop_toBottomOf="@+id/id_friendName" />
 
 </android.support.constraint.ConstraintLayout>

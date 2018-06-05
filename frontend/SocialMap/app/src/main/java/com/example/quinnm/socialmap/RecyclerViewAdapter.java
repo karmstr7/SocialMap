@@ -18,7 +18,7 @@ import java.util.ArrayList;
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>{
     private static final String TAG = "RecyclerViewAdapter";
 
-    ArrayList<String> mFriendNames = new ArrayList<>();
+    private ArrayList<String> mFriendNames = new ArrayList<>(1);
     private Context mContext;
 
     public RecyclerViewAdapter(ArrayList<String> mFriendNames, Context mContext) {
@@ -59,7 +59,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public int getItemCount() {
         return mFriendNames.size();
-
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{

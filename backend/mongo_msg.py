@@ -136,25 +136,34 @@ def mongo_delMsg(token):
     else:   # if unsuccessful
         return False    # return False
 
-def mongo_addFriend(user_id, friend):
-    result = {
-    'error_msg' : ""
-    }
+def mongo_addFriend(username, friend):
 
-    try:
-        user = users.find_one({'user_id': user_id})
-        friends = user['friends']
-        friends.append(friends)
-        users.update_one({
-            '_id':user['_id']
-        }, {'$set': {
-                'friends': friends
-            }
-        })
-        return result
-    except pymongo.errors.PyMongoError as e:
-        result['error_msg'] = e
-        return result
+    record = users.find_one({"username": friend})
+    if record is None:
+        return False, "friend not found"
+    user = users.find_one({"username": username})
+    user["friends"].append(friend)
+    result = users.find_one_and_replace({"username": username}, user)
+
+    if result != user:
+        return True, ""
+    else:
+        return False, "Failed to Add Friend"
+
+
+def mongo_delFriend(username, friend):
+
+    record = users.find_one({"username": friend})
+    if record is None:
+        return False, "friend not found"
+    user = users.find_one({"username": username})
+    user["friends"].remove(friend)
+    result = users.find_one_and_replace({"username": username}, user)
+
+    if result != user:
+        return True, ""
+    else:
+        return False, "Failed to Add Friend"
 
 def mongo_getFriends(username):
     result ={
@@ -162,14 +171,12 @@ def mongo_getFriends(username):
     'error_msg' : ""
     }
     try:
-        records = []
-        user = user.find_on({'username': username})
-        friends = user['friends']
-        record.append(friends)
-        result['friends'] = record
+        user = users.find_one({'username': username})
+        result['friends'] = user['friends']
+        print('FRIENDS RECEIVED FROM MONGODB:  ',result)
         return result
-    except pymongo.errors.PyMongoError as e:
-        result['error_msg'] = e
+    except :
+        result['error_msg'] = 'GET FRIENDS error'
         return result
 
 

@@ -1,24 +1,26 @@
 package com.example.quinnm.socialmap;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import static android.content.ContentValues.TAG;
 
 
-
-public class AddFriendFragment extends DialogFragment implements View.OnClickListener{
+public class AddFriendFragment extends DialogFragment implements
+        View.OnClickListener{
     private EditText _friendName;
     private Button _addButton, _cancelButton;
-
+    private static final String TAG = "AddFriendFragment";
 
 
     public interface AddFriendDialogListener {
@@ -45,7 +47,7 @@ public class AddFriendFragment extends DialogFragment implements View.OnClickLis
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_add_message, container);
+        return inflater.inflate(R.layout.fragment_add_friend, container);
     }
 
     @Override
@@ -55,8 +57,8 @@ public class AddFriendFragment extends DialogFragment implements View.OnClickLis
 //        get field from view
 
         _friendName = view.findViewById(R.id.id_friendName);
-        _addButton = view.findViewById(R.id.addButton);
-        _cancelButton = view.findViewById(R.id.cancelButton);
+        _addButton = view.findViewById(R.id._addButton);
+        _cancelButton = view.findViewById(R.id._cancelButton);
 
         _addButton.setOnClickListener(this);
 
@@ -70,13 +72,18 @@ public class AddFriendFragment extends DialogFragment implements View.OnClickLis
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
 
-
-
     @Override
     public void onClick(View v) {
     String friendUsername = _friendName.getText().toString();
 
+    AddFriendDialogListener listner = (AddFriendDialogListener) getActivity();
+    listner.OnAddFriend(friendUsername);
+//        Log.d(TAG, "onClick: added friend:  " + friendUsername);
+
+
 //    todo, check if username is in database
+
     }
+
 }
 
