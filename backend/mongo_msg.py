@@ -193,22 +193,17 @@ def mongo_getMsgs(username, friends):
         return records, ""
 
 
-def mongo_getFieldList(field, value):
+def mongo_checkUsername(username):
     """
     Reference: http://api.mongodb.com/python/current/api/pymongo/users.html
     """
     records = []
-    for record in users.find({field: value}):  # call to find msgs with share the value in specific field
-        del record['_id']
-        records.append(record)  # add each msg to list
-    # Sort the records by name:
-    # records.sort(key=lambda i: i[field])    # sort list by
-
+    for record in users.find({"username": username}):  # call to find msgs with share the value in specific field
+        records.append(record)
     if len(records) == 0:
-        return records, "No messages found"
+        return False, "No username found"
     else:
-        return records, ""
-
+        return True, ""
 
 def mongo_getUniqueValues(field):
     """
@@ -263,6 +258,7 @@ def mongo_tempTest():
         "getMsgs": False,
         "delMsg": False,
         "delUser": False,
+        "checkUsername": False,
         "clear": False
         }
 
@@ -294,6 +290,14 @@ def mongo_tempTest():
     result, error_msg = mongo_login(dummy2)
     assert error_msg != ""
     testResults["login"] = True
+
+    result, error_msg = mongo_checkUsername(dummy1["username"])
+    assert result == True
+    assert error_msg == ""
+    result, error_msg = mongo_checkUsername(dummy2["username"])
+    assert result == False
+    assert error_msg != ""
+    testResults["checkUsername"] = True
 
     result, error_msg = mongo_addFriend(dummy1["username"], dummy2["username"])
     assert result == False

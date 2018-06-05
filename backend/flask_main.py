@@ -73,7 +73,7 @@ def addMsg():
     }
 
     result, error_msg = mongo_addMsg(msg)
-    # On success, return the user's ID
+
     app.logger.debug("ERROR DURING ADDMSG: {}".format(error_msg))
     return jsonify({"error_msg": error_msg}), 200
 
@@ -87,7 +87,7 @@ def addFriend():
     friend = request.json['friend']
 
     result, error_msg = mongo_addFriend(username, friend)
-    # On success, return the user's ID
+
     app.logger.debug("ERROR DURING ADDFRIEND: {}".format(error_msg))
     return jsonify({"error_msg": error_msg}), 200
 
@@ -101,7 +101,7 @@ def delFriend():
     friend = request.json['friend']
 
     result, error_msg = mongo_delFriend(username, friend)
-    # On success, return the user's ID
+
     app.logger.debug("ERROR DURING DELFRIEND: {}".format(error_msg))
     return jsonify({"error_msg": error_msg}), 200
 
@@ -114,7 +114,7 @@ def delMsg():
     message_id = request.json['message_id']
 
     result, error_msg = mongo_delMsg(token)
-    # On success, return the user's ID
+
     app.logger.debug("ERROR DURING DELMSG: {}".format(error_msg))
     return jsonify({"error_msg": error_msg}), 200
 
@@ -127,7 +127,7 @@ def delUser():
     user_id = request.json['user_id']
 
     result, error_msg = mongo_delUser(user_id)
-    # On success, return the user's ID
+
     app.logger.debug("ERROR DURING DELUSER: {}".format(error_msg))
     return jsonify({"error_msg": error_msg}), 200
 
@@ -142,9 +142,22 @@ def getMsgs():
 
     result, error_msg = mongo_getMsgs(username, friends)
 
-    # On success, return the user's ID
+
     app.logger.debug("ERROR DURING GETMSGS: {}".format(error_msg))
     return jsonify({"result": result, "error_msg": error_msg}), 200
+
+
+@app.route('/socialmap/api/checkUsername', methods=['POST'])
+def checkUsername():
+    app.logger.debug("ATTEMPT TO CHECK FOR USERNAME")
+    app.logger.debug(request.json)
+
+    username = request.json['username']
+
+    result, error_msg = mongo_checkUsername(username)
+
+    app.logger.debug("ERROR DURING DELUSER: {}".format(error_msg))
+    return jsonify({"error_msg": error_msg}), 200
 
 
 @app.route('/socialmap/api/clear', methods=['POST'])
@@ -153,7 +166,7 @@ def clear():
     app.logger.debug(request.json)
 
     result, error_msg = mongo_clear()
-    # On success, return the user's ID
+
     app.logger.debug("ERROR DURING CLEAR: {}".format(error_msg))
     return jsonify({"error_msg": error_msg}), 200
 
@@ -182,5 +195,5 @@ def server_error(error):
 if __name__ == "__main__":
     app.debug = CONFIG.DEBUG
     app.logger.setLevel(logging.DEBUG)
-    # app.logger.debug(mongo_tempTest())
+    app.logger.debug(mongo_tempTest())
     app.run(port=CONFIG.PORT, host="localhost")
