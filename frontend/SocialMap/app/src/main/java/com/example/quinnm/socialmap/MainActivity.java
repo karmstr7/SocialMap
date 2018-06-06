@@ -103,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements
         // wait for user to choose where to create new message and marker
         _newMessageButton.setOnClickListener(
                 (View v) -> {
+                    _newMessageButton.setEnabled(false);
                     addMarkerMode = true;
                     Toast.makeText(MainActivity.this, "Choose a point to add a new message", Toast.LENGTH_LONG).show();
                     mapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
@@ -271,6 +272,7 @@ public class MainActivity extends AppCompatActivity implements
                 addMarkerMode = false;
             }
         });
+        _newMessageButton.setEnabled(true);
     }
 
     private void onAddMessageResponse(@NonNull Response<AddMessage> response) {
