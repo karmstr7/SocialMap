@@ -42,45 +42,45 @@ def mongo_login(act):
     """
     Reference: http://api.mongodb.com/python/current/api/pymongo/users.html
     """
-    record = users.find_one({"username": act["username"]})
     result = {'username': '',
               'date_created': '',
               'friends': [],
               'user_id': '',
-              'messages': [],
               'error_msg': ''}
+
+    record = users.find_one({"username": act["username"]})
 
     if record is None:
         result['error_msg'] = "user not found"
-        return result, result['error_msg']
+        return result
 
     if record['password'] != act['password']:
         result['error_msg'] = "password mismatch"
-        return result, result['error_msg']
+        return result
 
     result['username'] = record['username']
     result['date_created'] = record['date_created']
     result['friends'] = record['friends']
     result['user_id'] = record['user_id']
-    # result['messages'] = mongo_getMsgs(record['user_id'])
-    return result, "User Logged In"
+    return result
 
 
 def mongo_signup(act):
     """
     Reference: http://api.mongodb.com/python/current/api/pymongo/users.html
     """
-    record = users.find_one({"username": act["username"]})
     result = {'username': '',
               'user_id': '',
               'date_created': '',
               'friends': [],
               'error_msg': ''}
 
+    record = users.find_one({"username": act["username"]})
+
     # if user already exists,
     if record is not None:
         result['error_msg'] = "user already exists"
-        return result, result['error_msg']
+        return result
 
     user_id = generate_key()
     new_act = {
@@ -95,7 +95,7 @@ def mongo_signup(act):
     result['username'] = act['username']
     result['user_id'] = user_id
     result['date_created'] = act['date_created']
-    return result, "User Signed Up"
+    return result
 
 
 def mongo_addMsg(username, msg):
@@ -104,99 +104,121 @@ def mongo_addMsg(username, msg):
     """
 
     token = generate_key()
-    add_to_database = messages.insert_one(        # call to insert msg below into database
-        {
-            "message_id": token,                 # Type: string
-            "username": username,
-            "msg_data": msg["msg_data"],    # Type: dict
-            "msg_body": msg["msg_body"]               # Type: string
-        })
-
     result = {
         'message_id': token,
         'msg_body': msg["msg_body"],
         'error_msg': ""
     }
 
+    add_to_database = messages.insert_one(          # call to insert msg below into database
+        {
+            "message_id": token,                    # Type: string
+            "username": username,
+            "msg_data": msg["msg_data"],            # Type: dict
+            "msg_body": msg["msg_body"]             # Type: string
+        })
+
     if add_to_database.acknowledged is not True:    # if add was unsuccessful
         result['error_msg'] = "Message Failed to Add"
-        return result, result['error_msg']
-    else:   # if add was successful
-        return result, result['error_msg']
-
-
-def mongo_delMsg(token):
-    """
-    Reference: http://api.mongodb.com/python/current/api/pymongo/users.html
-    """
-    record = messages.find_one({"token": token})    # find msgs that have provided token
-    ret = messages.delete_one(record)     # delete found msg
-    if ret.deleted_count is 1:  # if successful
-        return True     # return True
-    else:   # if unsuccessful
-        return False    # return False
-
-def mongo_addFriend(username, friend):
-
-    record = users.find_one({"username": friend})
-    if record is None:
-        return False, "friend not found"
-    user = users.find_one({"username": username})
-    user["friends"].append(friend)
-    result = users.find_one_and_replace({"username": username}, user)
-
-    if result != user:
-        return True, ""
-    else:
-        return False, "Failed to Add Friend"
-
-
-def mongo_delFriend(username, friend):
-
-    record = users.find_one({"username": friend})
-    if record is None:
-        return False, "friend not found"
-    user = users.find_one({"username": username})
-    user["friends"].remove(friend)
-    result = users.find_one_and_replace({"username": username}, user)
-
-    if result != user:
-        return True, ""
-    else:
-        return False, "Failed to Add Friend"
-
-def mongo_getFriends(username):
-    result ={
-    'friends' : [],
-    'error_msg' : ""
-    }
-    try:
-        user = users.find_one({'username': username})
-        result['friends'] = user['friends']
-        print('FRIENDS RECEIVED FROM MONGODB:  ',result)
         return result
-    except :
-        result['error_msg'] = 'GET FRIENDS error'
+    else:                                           # if add was successful
         return result
 
 
-    
-def mongo_delUser(token):
+def mongo_delMsg(message_id):
     """
     Reference: http://api.mongodb.com/python/current/api/pymongo/users.html
     """
-    record = users.find_one({"token": token})    # find msgs that have provided token
-    ret = users.delete_one(record)     # delete found msg
-
     result = {
         'error_msg': ''
     }
 
-    if ret.deleted_count is 1:  # if successful
-        return result # return True
-    else:   # if unsuccessful
+    record = messages.find_one({'message_id': message_id})    # find msgs that have provided token
+
+    ret = messages.delete_one(record)               # delete found msg
+
+    if ret.deleted_count is 1:                      # if successful
+        return result, result['error_msg']
+    else:                                           # if unsuccessful
+        result['error_msg'] = "could not delete message"
+        return result, result['error_msg']
+
+
+def mongo_addFriend(username, friend):
+    result = {
+        'error_msg': ''
+    }
+
+    record = users.find_one({"username": friend})
+
+    if record is None:
+        result['error_msg'] = "friend not found"
+        return result
+
+    user = users.find_one({'username': username})
+    user['friends'].append(friend)
+    updated_user = users.find_one_and_replace({'username': username}, user)
+    if updated_user != user:
+        return result
+    else:
+        result['error_msg'] = "Failed to add friend"
+        return result
+
+
+def mongo_delFriend(username, friend):
+    result = {
+        'error_msg': ''
+    }
+
+    record = users.find_one({"username": friend})
+
+    if record is None:
+        result['error_msg'] = "friend not found"
+        return result
+
+    user = users.find_one({"username": username})
+    user["friends"].remove(friend)
+    updated_user = users.find_one_and_replace({"username": username}, user)
+
+    if updated_user != user:
+        return result
+    else:
+        result['error_msg'] = "Failed to Add Friend"
+        return result
+
+
+def mongo_getFriends(username):
+    result = {
+        'friends': [],
+        'error_msg': ''
+    }
+
+    try:
+        user = users.find_one({'username': username})
+        result['friends'] = user['friends']
+        return result
+    except:
+        result['error_msg'] = 'Could not get friends'
+        return result
+
+
+def mongo_delUser(user_id):
+    """
+    Reference: http://api.mongodb.com/python/current/api/pymongo/users.html
+    """
+    result = {
+        'error_msg': ''
+    }
+
+    record = users.find_one({"user_id": user_id})    # find msgs that have provided token
+
+    response = users.delete_one(record)     # delete found msg
+
+    if response.deleted_count is 1:         # if successful
+        return result                       # return True
+    else:                                   # if unsuccessful
         result['error_msg'] = "Could not delete account"
-        return result    # return False
+        return result                       # return False
 
 
 def mongo_getMsgs(username, friends):
