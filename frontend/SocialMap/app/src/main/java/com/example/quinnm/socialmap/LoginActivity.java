@@ -148,6 +148,7 @@ public class LoginActivity extends AppCompatActivity {
     public void loadUserInfo(Response<User> userResponse) {
         ((ApplicationStore) this.getApplication()).setUsername(userResponse.body().getUsername());
         ((ApplicationStore) this.getApplication()).setUserId(userResponse.body().getUserId());
+        ((ApplicationStore) this.getApplication()).setFriends(userResponse.body().getFriends());
         ((ApplicationStore) this.getApplication()).setDateCreated(userResponse.body().getDateCreated());
         onLoginSuccess();
     }
