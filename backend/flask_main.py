@@ -294,5 +294,5 @@ if __name__ == "__main__":
     app.debug = CONFIG.DEBUG
     # app.logger.setLevel(logging.DEBUG)
     # app.logger.debug(mongo_tempTest())
-    # app.run(port=CONFIG.PORT, host="localhost")
-    app.run(port=CONFIG.PORT, host="149.28.12.19")
+    app.run(port=CONFIG.PORT, host="localhost")
+    # app.run(port=CONFIG.PORT, host="149.28.12.19")
