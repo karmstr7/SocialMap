@@ -14,7 +14,7 @@ HERE = os.path.dirname(__file__)
 def command_line_args():
     """Returns namespace with settings from command line"""
     log.debug("-> Command line args")
-    parser = argparse.ArgumentParser(description="Memos of Mongo")
+    parser = argparse.ArgumentParser(description="SocialMap")
     parser.add_argument("-D", "--debug", dest="DEBUG",
                         action="store_const", const=True,
                         help="Turn on debugging and verbose logging")
