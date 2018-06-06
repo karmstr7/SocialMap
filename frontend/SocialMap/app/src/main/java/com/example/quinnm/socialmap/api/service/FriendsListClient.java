@@ -14,4 +14,7 @@ public interface FriendsListClient {
     @POST("addFriend")
     Call<AddFriend> addFriend(@Body AddFriend addFriend);
 
+    @POST("delFriend")
+    Call<AddFriend> delFriend(@Body AddFriend delFriend);
+
 }

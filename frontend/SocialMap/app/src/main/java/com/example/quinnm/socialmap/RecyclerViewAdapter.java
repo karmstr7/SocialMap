@@ -47,7 +47,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 Log.d(TAG, "onClick: clicked on: " + mFriendNames.get(position));
                 if (mContext instanceof ViewFriendsActivity){
 //                  todo implement delete friends method
-//                    (ViewFriendsActivity)mContext.deleteFriends(mFriendNames.get(position));
+                    ((ViewFriendsActivity) mContext).deleteFriend(mFriendNames.get(position));
+
                 }
 
 
@@ -65,7 +66,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         TextView friendName;
         Button deleteFriend;
-
         RelativeLayout parentLayout;
 
         public ViewHolder(View itemView) {
