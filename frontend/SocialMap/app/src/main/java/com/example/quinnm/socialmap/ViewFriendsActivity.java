@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 
 import java.util.List;
@@ -20,7 +19,7 @@ public class ViewFriendsActivity extends AppCompatActivity implements
 
     private FloatingActionButton _actionFab;
     private RecyclerView _recyclerView;
-    private RecyclerViewAdapter _adapter;
+    private FriendListRecyclerViewAdapter _adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +40,7 @@ public class ViewFriendsActivity extends AppCompatActivity implements
     }
 
     private void initRecyclerView() {
-        _adapter = new RecyclerViewAdapter(username, friends, this);
+        _adapter = new FriendListRecyclerViewAdapter(username, friends, this);
         _recyclerView.setAdapter(_adapter);
         _recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }

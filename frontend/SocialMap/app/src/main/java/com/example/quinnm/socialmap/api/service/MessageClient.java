@@ -1,6 +1,7 @@
 package com.example.quinnm.socialmap.api.service;
 
 import com.example.quinnm.socialmap.api.model.AddMessage;
+import com.example.quinnm.socialmap.api.model.DeleteMessage;
 import com.example.quinnm.socialmap.api.model.GetMessage;
 import com.example.quinnm.socialmap.api.model.Message;
 import com.example.quinnm.socialmap.api.model.User;
@@ -14,7 +15,7 @@ public interface MessageClient {
     Call<AddMessage> addMessage (@Body AddMessage addMessage);
 
     @POST("delMsg")
-    Call<Message> deleteMessage(@Body Message message);
+    Call<DeleteMessage> deleteMessage(@Body DeleteMessage deleteMessage);
 
     @POST("getMsgs")
     Call<GetMessage> getMessages(@Body GetMessage getMessage);

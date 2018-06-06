@@ -107,6 +107,7 @@ def mongo_addMsg(username, msg):
     result = {
         'message_id': token,
         'msg_body': msg["msg_body"],
+        'msg_data': msg["msg_data"],
         'error_msg': ""
     }
 
@@ -138,10 +139,10 @@ def mongo_delMsg(message_id):
     ret = messages.delete_one(record)               # delete found msg
 
     if ret.deleted_count is 1:                      # if successful
-        return result, result['error_msg']
+        return result
     else:                                           # if unsuccessful
         result['error_msg'] = "could not delete message"
-        return result, result['error_msg']
+        return result
 
 
 def mongo_addFriend(username, friend):

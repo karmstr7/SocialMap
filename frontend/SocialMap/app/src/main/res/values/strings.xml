@@ -16,6 +16,7 @@
     <string name="btn_add_message">Add New Message To Map</string>
     <string name="btn_view_friends">View Friends List</string>
     <string name="btn_my_profile">View My Profile</string>
+    <string name="btn_view_my_messages">View My Messages</string>
     <string name="mapbox_token">pk.eyJ1IjoicXVpbm5taWwiLCJhIjoiY2poNndlc2NuMDEyODJwcGd4OWw5d2M0YyJ9.ld7OWGt932HW0ebcv8CZFw</string>
     <string name="new_message_title">New Message</string>
     <string name="new_message_hint">Write a new message</string>
@@ -31,7 +32,7 @@
     <string name="viewProfile_signOut">Sign Out</string>
     <string name="base_url">http://10.0.2.2:8000/socialmap/api/</string>
     <!--<string name="base_url">http://192.168.137.1:8000/socialmap/api/</string>-->
-    <string name="hint_add_username" >Enter Username</string>
+    <string name="hint_add_username">Enter Username</string>
     <string name="Friend_title">Add Friend</string>
     <string name="NewFriend_hint">Enter Friends Username</string>
     <string name="viewFriends_banner">Friends</string>

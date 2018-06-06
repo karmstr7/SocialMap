@@ -39,9 +39,11 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.CameraMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -74,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final String TAG = "MainActivity";
 
     private boolean toolbarVisible = false;
-    private ImageButton _newMessageButton, _viewFriendsButton, _viewMyProfileButton;
+    private ImageButton _newMessageButton, _viewFriendsButton, _viewMyMessagesButton, _viewMyProfileButton;
 
     // TODO: REMOVE THIS BEFORE SUBMITTING
     private static final User DEFAULT_USER = new User("root","root");
@@ -98,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements
         _newMessageButton = findViewById(R.id.btn_new_message);
         _viewFriendsButton = findViewById(R.id.btn_view_friends);
         _viewMyProfileButton = findViewById(R.id.btn_view_my_profile);
+        _viewMyMessagesButton = findViewById(R.id.btn_view_my_messages);
 
         Mapbox.getInstance(this, getString(R.string.mapbox_token));
         mapView = findViewById(R.id.mapView);
@@ -122,11 +125,15 @@ public class MainActivity extends AppCompatActivity implements
         );
 
         _viewFriendsButton.setOnClickListener(
-                (View v) -> showFriendsListDialog()
+                (View v) -> showMyFriendsList()
         );
 
         _viewMyProfileButton.setOnClickListener(
-                (View v) -> showMyProfileDialog()
+                (View v) -> showMyProfile()
+        );
+
+        _viewMyMessagesButton.setOnClickListener(
+                (View v) -> showMyMessages()
         );
     }
 
@@ -134,11 +141,13 @@ public class MainActivity extends AppCompatActivity implements
         if (toolbarVisible) {
             _newMessageButton.setVisibility(View.INVISIBLE);
             _viewFriendsButton.setVisibility(View.INVISIBLE);
+            _viewMyMessagesButton.setVisibility(View.INVISIBLE);
             _viewMyProfileButton.setVisibility(View.INVISIBLE);
         }
         else {
             _newMessageButton.setVisibility(View.VISIBLE);
             _viewFriendsButton.setVisibility(View.VISIBLE);
+            _viewMyMessagesButton.setVisibility(View.VISIBLE);
             _viewMyProfileButton.setVisibility(View.VISIBLE);
         }
         toolbarVisible = !toolbarVisible;
@@ -150,14 +159,20 @@ public class MainActivity extends AppCompatActivity implements
         newMessageDialogFragment.show(fm, "NewMessageDialogFragment");
     }
 
-    public void showFriendsListDialog() {
-        Toast.makeText(MainActivity.this, "View Friends List", Toast.LENGTH_LONG).show();
+    public void showMyFriendsList() {
+        Toast.makeText(MainActivity.this, "View Friends List", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(getApplicationContext(), ViewFriendsActivity.class);
         MainActivity.this.startActivity(intent);
     }
 
-    public void showMyProfileDialog() {
-        Toast.makeText(MainActivity.this, "View Profile", Toast.LENGTH_LONG).show();
+    public void showMyMessages() {
+        Toast.makeText(MainActivity.this, "View My Messages", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(getApplicationContext(), ViewMessagesActivity.class);
+        MainActivity.this.startActivity(intent);
+    }
+
+    public void showMyProfile() {
+        Toast.makeText(MainActivity.this, "View Profile", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(getApplicationContext(), ViewProfileActivity.class);
         MainActivity.this.startActivity(intent);
     }
@@ -300,6 +315,13 @@ public class MainActivity extends AppCompatActivity implements
 
     private void onAddMessageResponse(@NonNull Response<AddMessage> response) {
         ((ApplicationStore) this.getApplication()).incrementNumberOfMessages();
+        Map<String, Object> newMessage = new HashMap<>();
+        newMessage.put("message_id", response.body().getMessageId());
+        newMessage.put("username", ((ApplicationStore) this.getApplication()).getUsername());
+        newMessage.put("msg_body", response.body().getMessageBody());
+        newMessage.put("msg_data", response.body().getMessageData());
+        ((ApplicationStore) this.getApplication()).addMessage(newMessage);
+
         mapboxMap.addMarker(new CustomMarkerOptions()
                 .markerId(response.body().getMessageId())
                 .position(currentPoint)

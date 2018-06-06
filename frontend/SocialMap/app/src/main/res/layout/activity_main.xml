@@ -36,16 +36,28 @@
             mapbox:srcCompat="@drawable/ic_group_white_48dp" />
 
         <ImageButton
-            android:id="@+id/btn_view_my_profile"
+            android:id="@+id/btn_view_my_messages"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:layout_marginEnd="16dp"
             android:layout_marginTop="112dp"
             android:background="@android:color/transparent"
+            android:contentDescription="@string/btn_view_my_messages"
+            android:visibility="invisible"
+            mapbox:srcCompat="@drawable/ic_archive_black_48dp" />
+
+        <ImageButton
+            android:id="@+id/btn_view_my_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="160dp"
+            android:background="@android:color/transparent"
             android:contentDescription="@string/btn_my_profile"
             android:visibility="invisible"
-            mapbox:srcCompat="@drawable/ic_person_outline_white_48dp" />
+            mapbox:srcCompat="@drawable/ic_person_black_48dp" />
 
     </com.mapbox.mapboxsdk.maps.MapView>
 

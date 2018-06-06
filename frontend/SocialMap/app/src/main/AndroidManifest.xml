@@ -37,10 +37,14 @@
         <activity
             android:name=".ViewProfileActivity"
             android:label="My Profile"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".ViewFriendsActivity"
             android:label="My Friends"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".ViewMessagesActivity"
+            android:label="My Messages"
             android:theme="@style/AppTheme" />
     </application>
 
