@@ -79,10 +79,8 @@ public class AddFriendFragment extends DialogFragment implements
     AddFriendDialogListener listner = (AddFriendDialogListener) getActivity();
     listner.OnAddFriend(friendUsername);
 //        Log.d(TAG, "onClick: added friend:  " + friendUsername);
-
-
+        dismiss();
 //    todo, check if username is in database
-
     }
 
 }
