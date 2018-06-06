@@ -40,7 +40,8 @@
             android:theme="@style/AppTheme"/>
         <activity
             android:name=".ViewFriendsActivity"
-            android:theme="@style/AppTheme.Dark" />
+            android:label="My Friends"
+            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>

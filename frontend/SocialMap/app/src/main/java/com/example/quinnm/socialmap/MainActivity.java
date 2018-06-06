@@ -1,6 +1,8 @@
 package com.example.quinnm.socialmap;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationListener;
 import android.support.annotation.NonNull;
@@ -25,6 +27,8 @@ import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.Icon;
+import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -203,13 +207,22 @@ public class MainActivity extends AppCompatActivity implements
             Toast.makeText(getBaseContext(), "Oops, couldn't parse messages", Toast.LENGTH_SHORT).show();
         }
 
+        String thisUser = ((ApplicationStore) this.getApplication()).getUsername();
+
         List<Map<String, Object>> messages = response.body().getMessages();
         int listSize = messages.size();
 
         ((ApplicationStore) this.getApplication()).setNumberOfMessages(listSize);
 
+        IconFactory iconFactory = IconFactory.getInstance(MainActivity.this);
+        Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.green_marker);
+        Icon friendIcon = iconFactory.fromBitmap(bitmap);
+
         for (int i = 0; i < listSize; i++) {
             double lat, lng;
+            String message_id = messages.get(i).get("message_id").toString();
+            String msg_body = messages.get(i).get("msg_body").toString();
+            String user = messages.get(i).get("username").toString();
 
             HashMap<String,String> map = new Gson().fromJson(
                     messages.get(i).get("msg_data").toString(),
@@ -217,14 +230,24 @@ public class MainActivity extends AppCompatActivity implements
 
             lat = Double.valueOf(map.get("latitude"));
             lng = Double.valueOf(map.get("longitude"));
-
             LatLng point = new LatLng(lat, lng);
 
-            mapboxMap.addMarker(new CustomMarkerOptions()
-                .markerId(messages.get(i).get("message_id").toString())
-                .snippet(messages.get(i).get("msg_body").toString())
-                .position(point)
-            );
+            if (user.equals(thisUser)) {
+                mapboxMap.addMarker(new CustomMarkerOptions()
+                        .markerId(message_id)
+                        .snippet("You: " + msg_body)
+                        .position(point)
+                );
+            }
+            else {
+                mapboxMap.addMarker(new CustomMarkerOptions()
+                        .markerId(message_id)
+                        .snippet(user + ": " + msg_body)
+                        .position(point)
+                        .icon(friendIcon)
+                );
+            }
+
         }
     }
 
@@ -280,7 +303,7 @@ public class MainActivity extends AppCompatActivity implements
         mapboxMap.addMarker(new CustomMarkerOptions()
                 .markerId(response.body().getMessageId())
                 .position(currentPoint)
-                .snippet(response.body().getMessageBody())
+                .snippet("You: " + response.body().getMessageBody())
         );
         currentPoint = null;
         addMarkerMode = false;
@@ -388,6 +411,11 @@ public class MainActivity extends AppCompatActivity implements
     public void onResume() {
         super.onResume();
         mapView.onResume();
+
+        if (mapboxMap != null) {
+            mapboxMap.clear();
+            getMessages();
+        }
     }
 
     @Override

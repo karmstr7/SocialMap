@@ -125,14 +125,14 @@ def delFriend():
     username = request.json['username']
     friend = request.json['friend']
 
-    result, error_msg = mongo_delFriend(username, friend)
+    result = mongo_delFriend(username, friend)
 
     if result['error_msg'] is not "":
         app.logger.debug('ERROR DURING DELETING FRIEND {} FROM USER {}: {}'.format(friend, username, result['error_msg']))
     else:
         app.logger.debug('DELETED {} AS FRIEND FROM {}'.format(friend, username))
 
-    return jsonify({result}), 200
+    return jsonify(result), 200
 
 
 @app.route('/socialmap/api/getFriends', methods = ['POST'])
@@ -155,14 +155,14 @@ def getFriends():
 def delUser():
     app.logger.debug("ATTEMPT TO DELETE USER")
 
-    user_id = request.json['user_id']
+    username = request.json['username']
 
-    result = mongo_delUser(user_id)
+    result = mongo_delUser(username)
 
     if result['error_msg'] is not "":
-        app.logger.debug('ERROR DURING DELETING USER {}: {}'.format(user_id, result['error_msg']))
+        app.logger.debug('ERROR DURING DELETING USER {}: {}'.format(username, result['error_msg']))
     else:
-        app.logger.debug('DELETED USER {}'.format(user_id))
+        app.logger.debug('DELETED USER {}'.format(username))
 
     return jsonify(result), 200
 
@@ -174,12 +174,11 @@ def getMsgs():
     username = request.json['username']
     friends = request.json['friends']
 
-    result, error_msg = mongo_getMsgs(username, friends)
+    result = mongo_getMsgs(username, friends)
 
-    print(result)
+    app.logger.debug("Messages: {}".format(result))
 
-    app.logger.debug("ERROR DURING GETMSGS: {}".format(error_msg))
-    return jsonify({"result": result, "error_msg": error_msg}), 200
+    return jsonify({"result": result, "error_msg": ''}), 200
 
 
 @app.route('/socialmap/api/clear', methods=['POST'])

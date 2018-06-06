@@ -34,4 +34,5 @@
     <string name="hint_add_username" >Enter Username</string>
     <string name="Friend_title">Add Friend</string>
     <string name="NewFriend_hint">Enter Friends Username</string>
+    <string name="viewFriends_banner">Friends</string>
 </resources>

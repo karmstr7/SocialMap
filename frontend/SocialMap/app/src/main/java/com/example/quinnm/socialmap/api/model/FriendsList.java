@@ -18,6 +18,5 @@ public class FriendsList {
     public FriendsList(String username){
         this.username = username;
     }
-
 }
 

@@ -53,7 +53,7 @@ public class NewMessageDialogFragment extends DialogFragment implements View.OnC
         Bundle args = new Bundle();
         args.putString("title", title);
         frag.setArguments(args);
-        frag.setCancelable(false);
+        frag.setCancelable(false); // prevent back and outside-area click from closing dialog
         return frag;
     }
 

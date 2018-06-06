@@ -183,7 +183,7 @@ def mongo_delFriend(username, friend):
     if updated_user != user:
         return result
     else:
-        result['error_msg'] = "Failed to Add Friend"
+        result['error_msg'] = "Failed to Delete Friend"
         return result
 
 
@@ -202,7 +202,7 @@ def mongo_getFriends(username):
         return result
 
 
-def mongo_delUser(user_id):
+def mongo_delUser(username):
     """
     Reference: http://api.mongodb.com/python/current/api/pymongo/users.html
     """
@@ -210,15 +210,18 @@ def mongo_delUser(user_id):
         'error_msg': ''
     }
 
-    record = users.find_one({"user_id": user_id})    # find msgs that have provided token
+    user = users.find_one({"username": username})                   # find user
 
-    response = users.delete_one(record)     # delete found msg
+    response = users.delete_one(user)                               # delete user
 
-    if response.deleted_count is 1:         # if successful
-        return result                       # return True
-    else:                                   # if unsuccessful
+    if response.deleted_count is 1:                             # if successful
+        for message in messages.find({'username': username}):        # find messages associated with this user
+            messages.delete_one(message)                             # delete the message
+        # Need to delete user from friendlists of other users
+        return result
+    else:                                                       # if unsuccessful
         result['error_msg'] = "Could not delete account"
-        return result                       # return False
+        return result
 
 
 def mongo_getMsgs(username, friends):
@@ -237,7 +240,7 @@ def mongo_getMsgs(username, friends):
             records.append(message)
     # Sort the records by name:
     # records.sort(key=lambda i: i[field])    # sort list by value
-    return records, ""
+    return records
 
 
 def mongo_getFieldList(field, value):
