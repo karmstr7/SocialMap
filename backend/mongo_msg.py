@@ -217,7 +217,8 @@ def mongo_delFriend(username, friend):
         return result
 
     user = users.find_one({"username": username})   # find user's account
-    user["friends"].remove(friend)                  # remove friend from list
+    if friend in user["friends"]:
+        user["friends"].remove(friend)                  # remove friend from list
     # update user's account object in the database
     updated_user = users.find_one_and_replace({"username": username}, user)
 
@@ -265,7 +266,9 @@ def mongo_delUser(username):
     }
 
     user = users.find_one({"username": username})                   # find user
-
+    if user is None:
+        result["error_msg"] = "user doesn't exist"
+        return result
     response = users.delete_one(user)                               # delete user
 
     # if successful
@@ -408,65 +411,61 @@ def mongo_tempTest():
         "msg_body": "Stuff here"
     }
 
-    result, error_msg = mongo_signup(dummy1)
+    result = mongo_signup(dummy1)
     assert result["username"] == dummy1["username"]
-    assert error_msg == ""
-    resDummy = result
+    assert result["error_msg"] == ""
     testResults["signup"] = True
 
-    result, error_msg = mongo_login(dummy1)
+    result = mongo_login(dummy1)
+    resDummy = result
     assert result["username"] == dummy1["username"]
-    result, error_msg = mongo_login(dummy2)
-    assert error_msg != ""
+    assert result["error_msg"] == ""
+    result = mongo_login(dummy2)
+    assert result["error_msg"] != ""
     testResults["login"] = True
 
-    result, error_msg = mongo_checkUsername(dummy1["username"])
-    assert result == True
-    assert error_msg == ""
-    result, error_msg = mongo_checkUsername(dummy2["username"])
-    assert result == False
-    assert error_msg != ""
+    result = mongo_checkUsername(dummy1["username"])
+    assert result["error_msg"] == ""
+    result = mongo_checkUsername(dummy2["username"])
+    assert result["error_msg"] != ""
     testResults["checkUsername"] = True
 
-    result, error_msg = mongo_addFriend(dummy1["username"], dummy2["username"])
-    assert result == False
-    assert error_msg != ""
-    result, error_msg = mongo_signup(dummy2)
-    result, error_msg = mongo_addFriend(dummy1["username"], dummy2["username"])
-    assert result == True
-    assert error_msg == ""
+    result = mongo_addFriend(dummy1["username"], dummy2["username"])
+    assert result["error_msg"] != ""
+    result = mongo_signup(dummy2)
+    result = mongo_addFriend(dummy1["username"], dummy2["username"])
+    assert result["error_msg"] == ""
     testResults["addFriend"] = True
 
-    result, error_msg = mongo_delFriend(dummy1["username"], dummy2["username"])
-    assert result == True
-    assert error_msg == ""
+    result = mongo_delFriend(dummy1["username"], dummy2["username"])
+    assert result["error_msg"] == ""
+    result = mongo_delFriend(dummy1["username"], dummy2["username"])
+    assert result["error_msg"] != ""
     testResults["delFriend"] = True
 
-    result, error_msg = mongo_addMsg(dummy1["username"], message1)
-    assert error_msg == ""
+    result = mongo_addMsg(dummy1["username"], message1)
+    assert result["error_msg"] == ""
     testResults["addMsg"] = True
 
-    result, error_msg = mongo_getMsgs(dummy1["username"], [])
-    assert len(result) == 1
-    assert error_msg == ""
-    result, error_msg = mongo_addMsg(dummy2["username"], message1)
-    result, error_msg = mongo_getMsgs("", [dummy1["username"], dummy2["username"]])
-    assert len(result) == 2
+    result = mongo_getMsgs(dummy1["username"], [])
+    assert len(result["result"]) == 1
+    assert result["error_msg"] == ""
+    result = mongo_addMsg(dummy2["username"], message1)
+    result = mongo_getMsgs("", [dummy1["username"], dummy2["username"]])
+    assert len(result["result"]) == 2
+    assert result["error_msg"] == ""
     testResults["getMsgs"] = True
 
-    result, error_msg = mongo_delMsg(result[0]["message_id"])
-    assert result == True
-    assert error_msg == ""
+    result = mongo_delMsg(result["result"][0]["message_id"])
+    assert result["error_msg"] == ""
     testResults["delMsg"] = True
 
-    result, error_msg = mongo_delUser(resDummy["user_id"])
-    assert result == True
-    assert error_msg == ""
+    result = mongo_delUser(resDummy["username"])
+    assert result["error_msg"] == ""
     testResults["delUser"] = True
 
-    result, error_msg = mongo_clear()
+    result = mongo_clear()
     assert result == True
-    assert error_msg == ""
     testResults["clear"] = True
 
     return testResults
