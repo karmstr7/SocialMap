@@ -10,6 +10,11 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
 
+/**
+ * Interface to be used by Retrofit for Http requests
+ * Access data models to get, add, or delete messages;
+ */
+
 public interface MessageClient {
     @POST("addMsg")
     Call<AddMessage> addMessage (@Body AddMessage addMessage);

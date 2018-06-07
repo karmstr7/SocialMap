@@ -10,6 +10,15 @@ import android.view.View;
 
 import java.util.List;
 
+/**
+ * The main view for displaying the friend list. *
+ * Contains a RecyclerView and a FloatingActionButton.
+ * Comes from MainActivity.
+ *
+ * @author Keir Armstrong, Quinn Milinois
+ * @since May 13, 2018
+ */
+
 public class ViewFriendsActivity extends AppCompatActivity implements
     AddFriendDialogFragment.AddFriendDialogListener {
     private static final String TAG = "ViewFriendsActivity";
@@ -56,6 +65,7 @@ public class ViewFriendsActivity extends AppCompatActivity implements
         _adapter.addFriend(friendName);
     }
 
+    // kill activity on back press
     @Override
     public void onBackPressed() {
         super.onBackPressed();

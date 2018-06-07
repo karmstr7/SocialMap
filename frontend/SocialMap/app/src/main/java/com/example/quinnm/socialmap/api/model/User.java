@@ -2,13 +2,25 @@ package com.example.quinnm.socialmap.api.model;
 
 import java.util.ArrayList;
 
+/**
+ * This class is used to carry data in the Http request to the server.
+ * Arguments: username, password
+ * Returns: error message, user id, friends list, date of creation
+ *
+ * @author Keir Armstrong
+ * @since June 1, 2018
+ */
+
 public class User {
+    // sending...
+    private String username;
+    private String password;
+
+    // receiving...
     private String error_msg;
     private String user_id;
     private ArrayList<String> friends;
     private String date_created;
-    private String username;
-    private String password;
 
     public User(String username, String password) {
         this.username = username;

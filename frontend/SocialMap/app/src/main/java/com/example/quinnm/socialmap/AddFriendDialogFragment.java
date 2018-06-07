@@ -24,6 +24,19 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+/**
+ * Prompts user to add a new friend.
+ * Contains a dialogue title, a text body, a add button, a cancel button.
+ * Communicates to ViewFriendsActivity
+ *
+ * @author Keir Armstrong, Quinn Milinois
+ * @since June 2, 2018
+ *
+ * REFERENCES:
+ *  DialogFragment Tutorial By CodePath Guides
+ *      https://guides.codepath.com/android/using-dialogfragment
+ */
+
 public class AddFriendDialogFragment extends DialogFragment implements
         View.OnClickListener {
     private static final String TAG = "AddFriendDialogFragment";
@@ -93,7 +106,6 @@ public class AddFriendDialogFragment extends DialogFragment implements
     }
 
     private void onAddFriendSuccess() {
-        ((ApplicationStore) this.getActivity().getApplication()).incrementNumberOfFriends();
         AddFriendDialogListener listener = (AddFriendDialogListener) getActivity();
         listener.OnAddFriend(_friendName.getText().toString());
 

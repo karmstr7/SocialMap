@@ -32,9 +32,11 @@ import android.widget.Toast;
  */
 
 public class NewMessageDialogFragment extends DialogFragment implements View.OnClickListener {
+    // activity constants
     private static final int ACTION_CREATE = 1;
     private static final int ACTION_CANCEL = 2;
 
+    // input references
     private EditText _messageText;
     private Button _createButton, _cancelButton;
 
@@ -57,6 +59,7 @@ public class NewMessageDialogFragment extends DialogFragment implements View.OnC
         return frag;
     }
 
+    // creates the layout for the activity
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
@@ -64,7 +67,7 @@ public class NewMessageDialogFragment extends DialogFragment implements View.OnC
         return inflater.inflate(R.layout.fragment_add_message, container);
     }
 
-
+    // after the layout has been created
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -72,12 +75,15 @@ public class NewMessageDialogFragment extends DialogFragment implements View.OnC
         setStyle(DialogFragment.STYLE_NO_TITLE, R.style.AppTheme_Dark);
         // Get field from view
 
+        // get input references
         _messageText = view.findViewById(R.id.input_message);
         _createButton = view.findViewById(R.id.btn_create);
         _cancelButton = view.findViewById(R.id.btn_cancel);
 
+        // call the onClick method in this dialog on click
         _createButton.setOnClickListener(this);
 
+        // close the dialog on click
         _cancelButton.setOnClickListener(
                 (View v) -> dismiss()
         );

@@ -56,8 +56,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 /**
  * The main map view after the user has logged in.
  * Loads map from Mapbox
+ * Attempts to locate the user's location
  * Single tap to activate toolbar, appear on top right.
- * TODO: Get user's location
+ * The toolbar contains 4 buttons, add message, view friends, view messages, and view profile.
+ *
  *
  * @author Keir Armstrong, Quinn Milinois
  * @since May 13, 2018
@@ -75,14 +77,18 @@ public class MainActivity extends AppCompatActivity implements
         LocationEngineListener,
         PermissionsListener{
 
+    // for debugging purposes
     private static final String TAG = "MainActivity";
 
+    // default visibility setting for the toolbar buttons
     private boolean toolbarVisible = false;
+    // input references
     private ImageButton _newMessageButton, _viewFriendsButton, _viewMyMessagesButton, _viewMyProfileButton;
 
-    // TODO: REMOVE THIS BEFORE SUBMITTING
-    private static final User DEFAULT_USER = new User("root","root");
+//    // TODO: REMOVE THIS BEFORE SUBMITTING
+//    private static final User DEFAULT_USER = new User("root","root");
 
+    // Mapbox objects
     private MapView mapView;
     private MapboxMap mapboxMap;
     private boolean addMarkerMode = false;
@@ -93,53 +99,72 @@ public class MainActivity extends AppCompatActivity implements
     private LocationLayerPlugin locationLayerPlugin;
     private Location originLocation;
 
+    // on Activity creation
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // display the activity using one of the layout structures inside /res/layout
         setContentView(R.layout.activity_main);
 
-        // get toolbar buttons
+        // get input references for this activity
         _newMessageButton = findViewById(R.id.btn_new_message);
         _viewFriendsButton = findViewById(R.id.btn_view_friends);
         _viewMyProfileButton = findViewById(R.id.btn_view_my_profile);
         _viewMyMessagesButton = findViewById(R.id.btn_view_my_messages);
 
+        // instantiate Mapbox
         Mapbox.getInstance(this, getString(R.string.mapbox_token));
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
+        // wait for Mapbox to load map
         mapView.getMapAsync(this);
 
         // wait for user to choose where to create new message and marker
         _newMessageButton.setOnClickListener(
                 (View v) -> {
+                    // disable the add message button until the adding process ends
                     _newMessageButton.setEnabled(false);
+                    // to distinguish between multiple listeners
                     addMarkerMode = true;
+                    // instruct the user to place marker
                     Toast.makeText(MainActivity.this, "Choose a point to add a new message", Toast.LENGTH_LONG).show();
+                    // instantiate new listener to get the position of the new message
                     mapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
                         @Override
                         public void onMapClick(@NonNull LatLng point) {
+                            // record the coordinates
                             currentPoint = point;
+                            // continue with creating new message
                             onCreateNewMessage();
+                            // remove the listener just created
                             mapboxMap.removeOnMapClickListener(this);
                         }
                     });
                 }
         );
 
+        // provide click listener to the View Friends button
         _viewFriendsButton.setOnClickListener(
+                // call showMyFriends() every time the button is clicked
                 (View v) -> showMyFriendsList()
         );
 
+//        provide click listener to the View My Profile button
         _viewMyProfileButton.setOnClickListener(
+                // call showMyProfile() every time the button is clicked
                 (View v) -> showMyProfile()
         );
 
+//        provide click listener to the View Messages button
         _viewMyMessagesButton.setOnClickListener(
+                // call showMyMessages() every time the button is clicked
                 (View v) -> showMyMessages()
         );
     }
 
     public void setToolbarVisibility() {
+        // if the buttons are visible, change them to be invisible
+        // if the buttons are invisible, change them to be visible
         if (toolbarVisible) {
             _newMessageButton.setVisibility(View.INVISIBLE);
             _viewFriendsButton.setVisibility(View.INVISIBLE);
@@ -156,35 +181,43 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     public void onCreateNewMessage() {
+        // create a dialog fragment, to have to user write the message text
         FragmentManager fm = getSupportFragmentManager();
         NewMessageDialogFragment newMessageDialogFragment = NewMessageDialogFragment.newInstance("New Message");
         newMessageDialogFragment.show(fm, "NewMessageDialogFragment");
     }
 
     public void showMyFriendsList() {
+        // go to activity ViewMyFriends
         Toast.makeText(MainActivity.this, "View Friends List", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(getApplicationContext(), ViewFriendsActivity.class);
         MainActivity.this.startActivity(intent);
     }
 
     public void showMyMessages() {
+        // go to activity ViewMyMessages
         Toast.makeText(MainActivity.this, "View My Messages", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(getApplicationContext(), ViewMessagesActivity.class);
         MainActivity.this.startActivity(intent);
     }
 
     public void showMyProfile() {
+        // go to activity ViewMyProfile
         Toast.makeText(MainActivity.this, "View Profile", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(getApplicationContext(), ViewProfileActivity.class);
         MainActivity.this.startActivity(intent);
     }
 
     private void getUserData() {
+        // used to load and refresh friends list and messages
         getFriends();
         getMessages();
     }
 
     private void getFriends() {
+        // get user's friends list
+
+        // get username from store
         String username = ((ApplicationStore) this.getApplication()).getUsername();
 
         FriendsList friendsList = new FriendsList(
@@ -205,22 +238,26 @@ public class MainActivity extends AppCompatActivity implements
             public void onResponse(@NonNull Call<FriendsList> call, @NonNull Response<FriendsList> response) {
                 if (response.body() != null && response.isSuccessful() && response.body().getErrorMsg().equals("")) {
                     onGetFriendsListSuccess(response);
+                    // on get friend list success
                 }
                 else {
                     Toast.makeText(getBaseContext(),
                             "ERROR: " + response.body().getErrorMsg(),
                             Toast.LENGTH_SHORT).show();
+                    // something went wrong as the server tried to get the friend list
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<FriendsList> call, @NonNull Throwable t) {
                 Toast.makeText(getBaseContext(), "Error: " + t.toString(), Toast.LENGTH_SHORT).show();
+                // usually network errors
             }
         });
     }
 
     private void onGetFriendsListSuccess(Response<FriendsList> response) {
+        // refresh the friends list in the store
         ((ApplicationStore) this.getApplication()).setFriends(response.body().getFriends());
         getMessages();
     }
@@ -362,13 +399,14 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void onAddMessageResponse(@NonNull Response<AddMessage> response) {
-        ((ApplicationStore) this.getApplication()).incrementNumberOfMessages();
+        // when the user has created new message
         Map<String, Object> newMessage = new HashMap<>();
         newMessage.put("message_id", response.body().getMessageId());
         newMessage.put("username", ((ApplicationStore) this.getApplication()).getUsername());
         newMessage.put("msg_body", response.body().getMessageBody());
         newMessage.put("msg_data", response.body().getMessageData());
         ((ApplicationStore) this.getApplication()).addMessage(newMessage);
+        ((ApplicationStore) this.getApplication()).incrementNumberOfMessages();
 
         mapboxMap.addMarker(new CustomMarkerOptions()
                 .markerId(response.body().getMessageId())
@@ -381,6 +419,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
+        // when the map is loaded
         MainActivity.this.mapboxMap = mapboxMap;
         enableLocation();
 
@@ -389,6 +428,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void enableLocation() {
+        // get location permission from user
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
             initializeLocationEngine();
             initializeLocationLayer();
@@ -401,6 +441,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @SuppressWarnings("MissingPermission")
     private void initializeLocationEngine() {
+        // sets up the location getter
         locationEngine = new LocationEngineProvider(this).obtainBestLocationEngineAvailable();
         locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
         locationEngine.activate();
@@ -416,6 +457,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void initializeLocationLayer() {
+        // sets up the layer plugin
         locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap, locationEngine);
         locationLayerPlugin.setLocationLayerEnabled(true);
         locationLayerPlugin.setCameraMode(CameraMode.TRACKING);

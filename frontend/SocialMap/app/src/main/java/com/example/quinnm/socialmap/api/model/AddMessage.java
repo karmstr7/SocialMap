@@ -2,6 +2,15 @@ package com.example.quinnm.socialmap.api.model;
 
 import com.mapbox.mapboxsdk.geometry.LatLng;
 
+/**
+ * This class is used to carry data in the Http request to the server.
+ * Argument: username, message text, message data
+ * Returns: error message, message id
+ *
+ * @author Keir Armstrong
+ * @since June 1, 2018
+ */
+
 public class AddMessage {
     // sending...
     String username;

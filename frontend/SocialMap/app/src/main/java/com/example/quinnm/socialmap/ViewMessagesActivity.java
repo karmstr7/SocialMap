@@ -14,6 +14,15 @@ import java.util.Map;
 
 import static android.webkit.ConsoleMessage.MessageLevel.LOG;
 
+/**
+ * The main view for displaying the message list. *
+ * Contains a RecyclerView
+ * Comes from MainActivity.
+ *
+ * @author Keir Armstrong
+ * @since June 4, 2018
+ */
+
 public class ViewMessagesActivity extends AppCompatActivity {
     private static final String TAG = "ViewMEssagesActivity";
 
@@ -37,24 +46,23 @@ public class ViewMessagesActivity extends AppCompatActivity {
     }
 
     private void initRecyclerView() {
-        filterFriendMessages();
-
-        _adapter = new MessageListRecyclerViewAdapter(_messages, _username, this);
+        _adapter = new MessageListRecyclerViewAdapter(filterFriendMessages(), _username, this);
         _recyclerView.setAdapter(_adapter);
         _recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
-    private void filterFriendMessages() {
-        List<Map<String, Object>> copyList = new ArrayList<>(_messages);
+    private List<Map<String, Object>> filterFriendMessages() {
+        List<Map<String, Object>> copyList = new ArrayList<>();
 
-        int listSize = copyList.size();
+        int listSize = _messages.size();
 
         for (int i = 0; i < listSize; i++) {
-            if (!copyList.get(i).get("username").equals(_username)) {
-                _messages.remove(i);
+            if (_messages.get(i).get("username").equals(_username)) {
+                copyList.add(_messages.get(i));
             }
         }
 
+        return copyList;
     }
 
     @Override

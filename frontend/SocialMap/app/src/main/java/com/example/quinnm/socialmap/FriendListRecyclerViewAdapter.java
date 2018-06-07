@@ -23,6 +23,19 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 
+/**
+ * Displays a list of the user's friends.
+ * Each items contains a textView, and a button.
+ * Communicates to ViewFriendsActivity
+ *
+ * @author Keir Armstrong, Quinn Milinois
+ * @since June 4, 2018
+ *
+ * REFERENCES:
+ *  DialogFragment Tutorial By CodePath Guides
+ *      https://guides.codepath.com/android/using-dialogfragment
+ */
+
 public class FriendListRecyclerViewAdapter extends RecyclerView.Adapter<FriendListRecyclerViewAdapter.ViewHolder> {
     private static final String TAG = "FriendListRecyclerViewAdapter";
 
@@ -95,7 +108,6 @@ public class FriendListRecyclerViewAdapter extends RecyclerView.Adapter<FriendLi
     // change this file name
 
     private void onDeleteFriendSuccess(@NonNull ViewHolder holder) {
-        ((ApplicationStore) _context.getApplicationContext()).decrementNumberOfFriends();
         _friends.remove(holder.getAdapterPosition());
         notifyItemRemoved(holder.getAdapterPosition());
     }

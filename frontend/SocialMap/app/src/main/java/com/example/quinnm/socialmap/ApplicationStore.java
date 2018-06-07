@@ -74,6 +74,7 @@ public class ApplicationStore extends Application {
 
     public void setFriends(List<String> friends) {
         this.friends = friends;
+        this.setNumberOfFriends(this.friends.size());
     }
 
     public void addFriend(String friend) {
@@ -90,6 +91,7 @@ public class ApplicationStore extends Application {
 
     public void setMessages(List<Map<String, Object>> messages) {
         this.messages = messages;
+        this.setNumberOfMessages(this.messages.size());
     }
 
     public String getUsername() {
