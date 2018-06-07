@@ -12,6 +12,9 @@ import android.widget.Toast;
 import com.example.quinnm.socialmap.api.model.DeleteUser;
 import com.example.quinnm.socialmap.api.service.UserClient;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -101,6 +104,13 @@ public class ViewProfileActivity extends AppCompatActivity {
     }
 
     private void onAccountDeleteSuccess() {
+        ((ApplicationStore) this.getApplication()).setFriends(new ArrayList<>());
+        ((ApplicationStore) this.getApplication()).setMessages(new ArrayList<>());
+        ((ApplicationStore) this.getApplication()).setUsername("");
+        ((ApplicationStore) this.getApplication()).setDateCreated("");
+        ((ApplicationStore) this.getApplication()).setNumberOfMessages(0);
+        ((ApplicationStore) this.getApplication()).setNumberOfFriends(0);
+
         _deleteAccountButton.setEnabled(true);
         setResult(RESULT_OK, null);
         Intent intent = new Intent(this, LoginActivity.class);
@@ -109,6 +119,13 @@ public class ViewProfileActivity extends AppCompatActivity {
     }
 
     private void onSignOutClick() {
+        ((ApplicationStore) this.getApplication()).setFriends(new ArrayList<>());
+        ((ApplicationStore) this.getApplication()).setMessages(new ArrayList<>());
+        ((ApplicationStore) this.getApplication()).setUsername("");
+        ((ApplicationStore) this.getApplication()).setDateCreated("");
+        ((ApplicationStore) this.getApplication()).setNumberOfMessages(0);
+        ((ApplicationStore) this.getApplication()).setNumberOfFriends(0);
+        
         setResult(RESULT_OK, null);
         Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

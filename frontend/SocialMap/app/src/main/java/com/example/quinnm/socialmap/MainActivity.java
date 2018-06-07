@@ -423,14 +423,16 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void setCameraPosition(Location location) {
-        CameraPosition position = new CameraPosition.Builder()
-                .target(new LatLng(location.getLatitude(), location.getLongitude()))
-                .tilt(30)
-                .zoom(15)
-                .build();
-
-        mapboxMap.animateCamera(CameraUpdateFactory
-                .newCameraPosition(position));
+        mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                new LatLng(location.getLatitude(), location.getLongitude()), 13));
+//        CameraPosition position = new CameraPosition.Builder()
+//                .target(new LatLng(location.getLatitude(), location.getLongitude()))
+//                .tilt(30)
+//                .zoom(15)
+//                .build();
+//
+//        mapboxMap.animateCamera(CameraUpdateFactory
+//                .newCameraPosition(position));
     }
 
     @Override
