@@ -153,8 +153,9 @@ public class SignupActivity extends AppCompatActivity {
 
         _signupButton.setEnabled(true);
         setResult(RESULT_OK, null);
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        SignupActivity.this.startActivity(intent);
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     public void onSignupFail() {

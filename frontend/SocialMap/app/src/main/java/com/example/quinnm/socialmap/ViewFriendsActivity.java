@@ -55,6 +55,12 @@ public class ViewFriendsActivity extends AppCompatActivity implements
     public void OnAddFriend(String friendName) {
         _adapter.addFriend(friendName);
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        this.finish();
+    }
 }
 
 

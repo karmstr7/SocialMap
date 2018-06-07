@@ -95,6 +95,7 @@ public class FriendListRecyclerViewAdapter extends RecyclerView.Adapter<FriendLi
     // change this file name
 
     private void onDeleteFriendSuccess(@NonNull ViewHolder holder) {
+        ((ApplicationStore) _context.getApplicationContext()).decrementNumberOfFriends();
         _friends.remove(holder.getAdapterPosition());
         notifyItemRemoved(holder.getAdapterPosition());
     }

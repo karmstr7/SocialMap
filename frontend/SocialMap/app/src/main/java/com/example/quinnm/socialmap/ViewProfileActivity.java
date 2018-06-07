@@ -103,15 +103,21 @@ public class ViewProfileActivity extends AppCompatActivity {
     private void onAccountDeleteSuccess() {
         _deleteAccountButton.setEnabled(true);
         setResult(RESULT_OK, null);
-        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-        ViewProfileActivity.this.startActivity(intent);
-        finish();
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 
     private void onSignOutClick() {
         setResult(RESULT_OK, null);
-        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-        ViewProfileActivity.this.startActivity(intent);
-        finish();
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        this.finish();
     }
 }

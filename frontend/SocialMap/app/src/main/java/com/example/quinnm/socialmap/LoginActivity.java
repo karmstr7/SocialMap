@@ -148,15 +148,15 @@ public class LoginActivity extends AppCompatActivity {
     public void loadUserInfo(Response<User> userResponse) {
         ((ApplicationStore) this.getApplication()).setUsername(userResponse.body().getUsername());
         ((ApplicationStore) this.getApplication()).setUserId(userResponse.body().getUserId());
-        ((ApplicationStore) this.getApplication()).setFriends(userResponse.body().getFriends());
         ((ApplicationStore) this.getApplication()).setDateCreated(userResponse.body().getDateCreated());
         onLoginSuccess();
     }
 
     public void onLoginSuccess() {
         _loginButton.setEnabled(true);
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        LoginActivity.this.startActivity(intent);
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     public void onLoginFail() {

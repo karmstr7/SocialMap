@@ -93,6 +93,7 @@ public class AddFriendDialogFragment extends DialogFragment implements
     }
 
     private void onAddFriendSuccess() {
+        ((ApplicationStore) this.getActivity().getApplication()).incrementNumberOfFriends();
         AddFriendDialogListener listener = (AddFriendDialogListener) getActivity();
         listener.OnAddFriend(_friendName.getText().toString());
 

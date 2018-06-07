@@ -51,6 +51,7 @@ public class MessageListRecyclerViewAdapter extends RecyclerView.Adapter<Message
 
 
     private void onDeleteMessageSuccess(@NonNull ViewHolder holder) {
+        ((ApplicationStore) _context.getApplicationContext()).decrementNumberOfMessages();
         _messages.remove(holder.getAdapterPosition());
         notifyItemRemoved(holder.getAdapterPosition());
     }

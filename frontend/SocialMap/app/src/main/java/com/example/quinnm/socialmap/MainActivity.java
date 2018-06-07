@@ -14,8 +14,10 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.quinnm.socialmap.api.model.AddMessage;
+import com.example.quinnm.socialmap.api.model.FriendsList;
 import com.example.quinnm.socialmap.api.model.GetMessage;
 import com.example.quinnm.socialmap.api.model.User;
+import com.example.quinnm.socialmap.api.service.FriendsListClient;
 import com.example.quinnm.socialmap.api.service.MessageClient;
 
 import com.google.gson.Gson;
@@ -177,6 +179,52 @@ public class MainActivity extends AppCompatActivity implements
         MainActivity.this.startActivity(intent);
     }
 
+    private void getUserData() {
+        getFriends();
+        getMessages();
+    }
+
+    private void getFriends() {
+        String username = ((ApplicationStore) this.getApplication()).getUsername();
+
+        FriendsList friendsList = new FriendsList(
+                username
+        );
+
+        Retrofit.Builder builder = new Retrofit.Builder()
+                .baseUrl(getString(R.string.base_url))
+                .addConverterFactory(GsonConverterFactory.create());
+
+        Retrofit retrofit = builder.build();
+
+        FriendsListClient client = retrofit.create(FriendsListClient.class);
+        Call<FriendsList> call = client.getFriendsList(friendsList);
+
+        call.enqueue(new Callback<FriendsList>() {
+            @Override
+            public void onResponse(@NonNull Call<FriendsList> call, @NonNull Response<FriendsList> response) {
+                if (response.body() != null && response.isSuccessful() && response.body().getErrorMsg().equals("")) {
+                    onGetFriendsListSuccess(response);
+                }
+                else {
+                    Toast.makeText(getBaseContext(),
+                            "ERROR: " + response.body().getErrorMsg(),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<FriendsList> call, @NonNull Throwable t) {
+                Toast.makeText(getBaseContext(), "Error: " + t.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void onGetFriendsListSuccess(Response<FriendsList> response) {
+        ((ApplicationStore) this.getApplication()).setFriends(response.body().getFriends());
+        getMessages();
+    }
+
     public void getMessages() {
         String username = ((ApplicationStore) this.getApplication()).getUsername();
         List<String> friends = ((ApplicationStore) this.getApplication()).getFriends();
@@ -336,7 +384,7 @@ public class MainActivity extends AppCompatActivity implements
         MainActivity.this.mapboxMap = mapboxMap;
         enableLocation();
 
-        getMessages();
+        getUserData();
         mapboxMap.addOnMapClickListener(this);
     }
 
@@ -436,7 +484,7 @@ public class MainActivity extends AppCompatActivity implements
 
         if (mapboxMap != null) {
             mapboxMap.clear();
-            getMessages();
+            getFriends();
         }
     }
 

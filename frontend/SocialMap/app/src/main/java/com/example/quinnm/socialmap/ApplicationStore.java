@@ -44,6 +44,18 @@ public class ApplicationStore extends Application {
         this.numberOfMessages++;
     }
 
+    public void decrementNumberOfMessages() {
+        this.numberOfMessages--;
+    }
+
+    public void incrementNumberOfFriends() {
+        this.numberOfFriends++;
+    }
+
+    public void decrementNumberOfFriends() {
+        this.numberOfFriends--;
+    }
+
     public void setNumberOfFriends(int numberOfFriends) {
         this.numberOfFriends = numberOfFriends;
     }
