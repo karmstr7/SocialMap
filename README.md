@@ -1,4 +1,4 @@
-
+![alt text](SocialMap.png)
 # SocialMap(06/05/2018):
 
 SocialMap is an Android app. It is a social media which user can share their experiences on a map. User's friend can view his/her message on the app. It allows user to add friend, and delete a friend, add messages, delete messages and so on.
